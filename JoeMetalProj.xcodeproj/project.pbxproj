@@ -7,13 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D89E33BD1F1FCF030006F5A3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D89E33BC1F1FCF030006F5A3 /* AppDelegate.swift */; };
 		D89E33BF1F1FCF030006F5A3 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D89E33BE1F1FCF030006F5A3 /* ViewController.swift */; };
 		D89E33C21F1FCF030006F5A3 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D89E33C01F1FCF030006F5A3 /* Main.storyboard */; };
 		D89E33C41F1FCF030006F5A3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D89E33C31F1FCF030006F5A3 /* Assets.xcassets */; };
 		D89E33C71F1FCF030006F5A3 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D89E33C51F1FCF030006F5A3 /* LaunchScreen.storyboard */; };
 		D89E33D21F1FCF040006F5A3 /* JoeMetalProjTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D89E33D11F1FCF040006F5A3 /* JoeMetalProjTests.swift */; };
 		D89E33DD1F1FCF040006F5A3 /* JoeMetalProjUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D89E33DC1F1FCF040006F5A3 /* JoeMetalProjUITests.swift */; };
+		D89E33F61F1FCF650006F5A3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D89E33EB1F1FCF650006F5A3 /* AppDelegate.swift */; };
+		D89E33F71F1FCF650006F5A3 /* Cube.swift in Sources */ = {isa = PBXBuildFile; fileRef = D89E33EC1F1FCF650006F5A3 /* Cube.swift */; };
+		D89E33F91F1FCF650006F5A3 /* Matrix4.m in Sources */ = {isa = PBXBuildFile; fileRef = D89E33F01F1FCF650006F5A3 /* Matrix4.m */; };
+		D89E33FB1F1FCF650006F5A3 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = D89E33F21F1FCF650006F5A3 /* Shaders.metal */; };
+		D89E33FD1F1FCF650006F5A3 /* Vertex.swift in Sources */ = {isa = PBXBuildFile; fileRef = D89E33F41F1FCF650006F5A3 /* Vertex.swift */; };
+		D8FD39491F2234DE003A548B /* SubMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8FD39481F2234DE003A548B /* SubMesh.swift */; };
+		D8FD394B1F223AF3003A548B /* RenderPass.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8FD394A1F223AF3003A548B /* RenderPass.swift */; };
+		D8FD39531F224564003A548B /* Uniforms.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8FD39521F224564003A548B /* Uniforms.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,18 +42,27 @@
 
 /* Begin PBXFileReference section */
 		D89E33B91F1FCF030006F5A3 /* JoeMetalProj.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JoeMetalProj.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		D89E33BC1F1FCF030006F5A3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D89E33BE1F1FCF030006F5A3 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		D89E33C11F1FCF030006F5A3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		D89E33C31F1FCF030006F5A3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D89E33C61F1FCF030006F5A3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		D89E33C81F1FCF030006F5A3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D89E33CD1F1FCF040006F5A3 /* JoeMetalProjTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JoeMetalProjTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D89E33D11F1FCF040006F5A3 /* JoeMetalProjTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoeMetalProjTests.swift; sourceTree = "<group>"; };
 		D89E33D31F1FCF040006F5A3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D89E33D81F1FCF040006F5A3 /* JoeMetalProjUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JoeMetalProjUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D89E33DC1F1FCF040006F5A3 /* JoeMetalProjUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoeMetalProjUITests.swift; sourceTree = "<group>"; };
 		D89E33DE1F1FCF040006F5A3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D89E33EA1F1FCF640006F5A3 /* JoeMetalProj-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "JoeMetalProj-Bridging-Header.h"; sourceTree = "<group>"; };
+		D89E33EB1F1FCF650006F5A3 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		D89E33EC1F1FCF650006F5A3 /* Cube.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cube.swift; sourceTree = "<group>"; };
+		D89E33EE1F1FCF650006F5A3 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D89E33EF1F1FCF650006F5A3 /* Matrix4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Matrix4.h; sourceTree = "<group>"; };
+		D89E33F01F1FCF650006F5A3 /* Matrix4.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Matrix4.m; sourceTree = "<group>"; };
+		D89E33F21F1FCF650006F5A3 /* Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
+		D89E33F41F1FCF650006F5A3 /* Vertex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Vertex.swift; sourceTree = "<group>"; };
+		D8FD39481F2234DE003A548B /* SubMesh.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubMesh.swift; sourceTree = "<group>"; };
+		D8FD394A1F223AF3003A548B /* RenderPass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RenderPass.swift; sourceTree = "<group>"; };
+		D8FD39521F224564003A548B /* Uniforms.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Uniforms.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -97,12 +113,15 @@
 		D89E33BB1F1FCF030006F5A3 /* JoeMetalProj */ = {
 			isa = PBXGroup;
 			children = (
-				D89E33BC1F1FCF030006F5A3 /* AppDelegate.swift */,
+				D8FD39541F224694003A548B /* Engine */,
+				D89E33EB1F1FCF650006F5A3 /* AppDelegate.swift */,
+				D89E33EE1F1FCF650006F5A3 /* Info.plist */,
+				D89E33F41F1FCF650006F5A3 /* Vertex.swift */,
 				D89E33BE1F1FCF030006F5A3 /* ViewController.swift */,
 				D89E33C01F1FCF030006F5A3 /* Main.storyboard */,
 				D89E33C31F1FCF030006F5A3 /* Assets.xcassets */,
 				D89E33C51F1FCF030006F5A3 /* LaunchScreen.storyboard */,
-				D89E33C81F1FCF030006F5A3 /* Info.plist */,
+				D89E33EA1F1FCF640006F5A3 /* JoeMetalProj-Bridging-Header.h */,
 			);
 			path = JoeMetalProj;
 			sourceTree = "<group>";
@@ -123,6 +142,44 @@
 				D89E33DE1F1FCF040006F5A3 /* Info.plist */,
 			);
 			path = JoeMetalProjUITests;
+			sourceTree = "<group>";
+		};
+		D8FD39541F224694003A548B /* Engine */ = {
+			isa = PBXGroup;
+			children = (
+				D8FD39561F2246FE003A548B /* Shaders */,
+				D8FD39571F224712003A548B /* Maths */,
+				D8FD39551F22469C003A548B /* Renderer */,
+			);
+			name = Engine;
+			sourceTree = "<group>";
+		};
+		D8FD39551F22469C003A548B /* Renderer */ = {
+			isa = PBXGroup;
+			children = (
+				D89E33EC1F1FCF650006F5A3 /* Cube.swift */,
+				D8FD39521F224564003A548B /* Uniforms.swift */,
+				D8FD39481F2234DE003A548B /* SubMesh.swift */,
+				D8FD394A1F223AF3003A548B /* RenderPass.swift */,
+			);
+			name = Renderer;
+			sourceTree = "<group>";
+		};
+		D8FD39561F2246FE003A548B /* Shaders */ = {
+			isa = PBXGroup;
+			children = (
+				D89E33F21F1FCF650006F5A3 /* Shaders.metal */,
+			);
+			name = Shaders;
+			sourceTree = "<group>";
+		};
+		D8FD39571F224712003A548B /* Maths */ = {
+			isa = PBXGroup;
+			children = (
+				D89E33EF1F1FCF650006F5A3 /* Matrix4.h */,
+				D89E33F01F1FCF650006F5A3 /* Matrix4.m */,
+			);
+			name = Maths;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -194,6 +251,7 @@
 					D89E33B81F1FCF030006F5A3 = {
 						CreatedOnToolsVersion = 8.3.3;
 						DevelopmentTeam = 437W2955TM;
+						LastSwiftMigration = 0830;
 						ProvisioningStyle = Automatic;
 					};
 					D89E33CC1F1FCF040006F5A3 = {
@@ -262,8 +320,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D89E33F71F1FCF650006F5A3 /* Cube.swift in Sources */,
+				D89E33FB1F1FCF650006F5A3 /* Shaders.metal in Sources */,
+				D89E33FD1F1FCF650006F5A3 /* Vertex.swift in Sources */,
+				D89E33F91F1FCF650006F5A3 /* Matrix4.m in Sources */,
+				D8FD394B1F223AF3003A548B /* RenderPass.swift in Sources */,
+				D89E33F61F1FCF650006F5A3 /* AppDelegate.swift in Sources */,
 				D89E33BF1F1FCF030006F5A3 /* ViewController.swift in Sources */,
-				D89E33BD1F1FCF030006F5A3 /* AppDelegate.swift in Sources */,
+				D8FD39491F2234DE003A548B /* SubMesh.swift in Sources */,
+				D8FD39531F224564003A548B /* Uniforms.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -417,11 +482,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				DEVELOPMENT_TEAM = 437W2955TM;
 				INFOPLIST_FILE = JoeMetalProj/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = JMM.JoeMetalProj;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "JoeMetalProj/JoeMetalProj-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
@@ -430,11 +498,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				DEVELOPMENT_TEAM = 437W2955TM;
 				INFOPLIST_FILE = JoeMetalProj/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = JMM.JoeMetalProj;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "JoeMetalProj/JoeMetalProj-Bridging-Header.h";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
@@ -516,6 +586,7 @@
 				D89E33E31F1FCF040006F5A3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		D89E33E41F1FCF040006F5A3 /* Build configuration list for PBXNativeTarget "JoeMetalProjTests" */ = {
 			isa = XCConfigurationList;
@@ -524,6 +595,7 @@
 				D89E33E61F1FCF040006F5A3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		D89E33E71F1FCF040006F5A3 /* Build configuration list for PBXNativeTarget "JoeMetalProjUITests" */ = {
 			isa = XCConfigurationList;
@@ -532,6 +604,7 @@
 				D89E33E91F1FCF040006F5A3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
