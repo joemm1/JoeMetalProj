@@ -25,21 +25,23 @@ class MetalObjects
 
 class RenderPass
 {
-    func render(metalObjects: MetalObjects, clearColour: MTLClearColor, perPassUniforms: PerPassUniforms, subMeshes: [SubMesh])
+	func render(kernel: Kernel, clearColour: MTLClearColor, perPassUniforms: PerPassUniforms, subMeshes: [SubMesh])
     {
+		let drawable = kernel.metalLayer.nextDrawable()!
+		
         //render pass
         let renderPassDescriptor = MTLRenderPassDescriptor()
-        renderPassDescriptor.colorAttachments[0].texture = metalObjects.drawable.texture
+        renderPassDescriptor.colorAttachments[0].texture = drawable.texture
         renderPassDescriptor.colorAttachments[0].loadAction = .clear
         renderPassDescriptor.colorAttachments[0].clearColor = clearColour
         renderPassDescriptor.colorAttachments[0].storeAction = .store
         
         //cmd encoder
-        let commandBuffer = metalObjects.commandQueue.makeCommandBuffer()
+        let commandBuffer = kernel.commandQueue.makeCommandBuffer()
         let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)
 
         //per-pass uniforms
-        perPassUniforms.bind(metalObjects: metalObjects, renderEncoder: renderEncoder)
+        perPassUniforms.bind(device: kernel.device, renderEncoder: renderEncoder)
         
         //pass state
         renderEncoder.setCullMode(MTLCullMode.front)
@@ -47,13 +49,13 @@ class RenderPass
         //iterate over submeshes
         for subMesh in subMeshes
         {
-            subMesh.render(metalObjects: metalObjects, renderEncoder: renderEncoder)
+			subMesh.render(kernel: kernel, renderEncoder: renderEncoder)
         }
         
         //end encoding
         renderEncoder.endEncoding()
         
-        commandBuffer.present(metalObjects.drawable)
+        commandBuffer.present(drawable)
         commandBuffer.commit()
     }
 }

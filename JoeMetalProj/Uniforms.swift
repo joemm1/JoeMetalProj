@@ -13,14 +13,14 @@ class Uniforms
 {
     let binding: Int
 
-    init(device: MTLDevice, binding: Int)
+	init(binding: Int)
     {
         self.binding = binding;
     }
     
-    func bind(metalObjects: MetalObjects, renderEncoder: MTLRenderCommandEncoder)
+	func bind(device: MTLDevice, renderEncoder: MTLRenderCommandEncoder)
     {
-        let uniformBuffer = metalObjects.device.makeBuffer(length: getSizeInBytes(), options: [])
+        let uniformBuffer = device.makeBuffer(length: getSizeInBytes(), options: [])
         
         copyIn(buffer: uniformBuffer)
 
@@ -44,11 +44,11 @@ class PerPassUniforms : Uniforms
     var view:   Matrix4
     var proj:   Matrix4
     
-    init(device: MTLDevice, binding: Int, view: Matrix4, proj: Matrix4)
+	init(binding: Int, view: Matrix4, proj: Matrix4)
     {
         self.view = view
         self.proj = proj
-        super.init(device: device, binding: binding)
+        super.init(binding: binding)
     }
     
     override func copyIn(buffer: MTLBuffer)
@@ -69,10 +69,10 @@ class PerSubMeshUniforms : Uniforms
 {
     var world:   Matrix4
     
-    init(device: MTLDevice, binding: Int, world: Matrix4)
+    init(binding: Int, world: Matrix4)
     {
         self.world = world
-        super.init(device: device, binding: binding)
+        super.init(binding: binding)
     }
     
     override func copyIn(buffer: MTLBuffer)

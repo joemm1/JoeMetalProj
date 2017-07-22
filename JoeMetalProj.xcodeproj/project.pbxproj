@@ -21,6 +21,9 @@
 		D8FD39491F2234DE003A548B /* SubMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8FD39481F2234DE003A548B /* SubMesh.swift */; };
 		D8FD394B1F223AF3003A548B /* RenderPass.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8FD394A1F223AF3003A548B /* RenderPass.swift */; };
 		D8FD39531F224564003A548B /* Uniforms.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8FD39521F224564003A548B /* Uniforms.swift */; };
+		D8FD39591F23E8EB003A548B /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8FD39581F23E8EB003A548B /* App.swift */; };
+		D8FD395C1F23EAA2003A548B /* TouchMgr.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8FD395B1F23EAA2003A548B /* TouchMgr.swift */; };
+		D8FD39601F23EE11003A548B /* Kernel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8FD395F1F23EE11003A548B /* Kernel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,6 +66,9 @@
 		D8FD39481F2234DE003A548B /* SubMesh.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubMesh.swift; sourceTree = "<group>"; };
 		D8FD394A1F223AF3003A548B /* RenderPass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RenderPass.swift; sourceTree = "<group>"; };
 		D8FD39521F224564003A548B /* Uniforms.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Uniforms.swift; sourceTree = "<group>"; };
+		D8FD39581F23E8EB003A548B /* App.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
+		D8FD395B1F23EAA2003A548B /* TouchMgr.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TouchMgr.swift; sourceTree = "<group>"; };
+		D8FD395F1F23EE11003A548B /* Kernel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Kernel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,15 +119,9 @@
 		D89E33BB1F1FCF030006F5A3 /* JoeMetalProj */ = {
 			isa = PBXGroup;
 			children = (
+				D8FD395A1F23E8F7003A548B /* App */,
 				D8FD39541F224694003A548B /* Engine */,
-				D89E33EB1F1FCF650006F5A3 /* AppDelegate.swift */,
-				D89E33EE1F1FCF650006F5A3 /* Info.plist */,
-				D89E33F41F1FCF650006F5A3 /* Vertex.swift */,
-				D89E33BE1F1FCF030006F5A3 /* ViewController.swift */,
-				D89E33C01F1FCF030006F5A3 /* Main.storyboard */,
-				D89E33C31F1FCF030006F5A3 /* Assets.xcassets */,
-				D89E33C51F1FCF030006F5A3 /* LaunchScreen.storyboard */,
-				D89E33EA1F1FCF640006F5A3 /* JoeMetalProj-Bridging-Header.h */,
+				D8FD395E1F23EB15003A548B /* iOS */,
 			);
 			path = JoeMetalProj;
 			sourceTree = "<group>";
@@ -147,6 +147,7 @@
 		D8FD39541F224694003A548B /* Engine */ = {
 			isa = PBXGroup;
 			children = (
+				D8FD395D1F23EAAF003A548B /* IO */,
 				D8FD39561F2246FE003A548B /* Shaders */,
 				D8FD39571F224712003A548B /* Maths */,
 				D8FD39551F22469C003A548B /* Renderer */,
@@ -157,6 +158,8 @@
 		D8FD39551F22469C003A548B /* Renderer */ = {
 			isa = PBXGroup;
 			children = (
+				D8FD395F1F23EE11003A548B /* Kernel.swift */,
+				D89E33F41F1FCF650006F5A3 /* Vertex.swift */,
 				D89E33EC1F1FCF650006F5A3 /* Cube.swift */,
 				D8FD39521F224564003A548B /* Uniforms.swift */,
 				D8FD39481F2234DE003A548B /* SubMesh.swift */,
@@ -178,8 +181,38 @@
 			children = (
 				D89E33EF1F1FCF650006F5A3 /* Matrix4.h */,
 				D89E33F01F1FCF650006F5A3 /* Matrix4.m */,
+				D89E33EA1F1FCF640006F5A3 /* JoeMetalProj-Bridging-Header.h */,
 			);
 			name = Maths;
+			sourceTree = "<group>";
+		};
+		D8FD395A1F23E8F7003A548B /* App */ = {
+			isa = PBXGroup;
+			children = (
+				D8FD39581F23E8EB003A548B /* App.swift */,
+			);
+			name = App;
+			sourceTree = "<group>";
+		};
+		D8FD395D1F23EAAF003A548B /* IO */ = {
+			isa = PBXGroup;
+			children = (
+				D8FD395B1F23EAA2003A548B /* TouchMgr.swift */,
+			);
+			name = IO;
+			sourceTree = "<group>";
+		};
+		D8FD395E1F23EB15003A548B /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				D89E33EB1F1FCF650006F5A3 /* AppDelegate.swift */,
+				D89E33EE1F1FCF650006F5A3 /* Info.plist */,
+				D89E33BE1F1FCF030006F5A3 /* ViewController.swift */,
+				D89E33C01F1FCF030006F5A3 /* Main.storyboard */,
+				D89E33C31F1FCF030006F5A3 /* Assets.xcassets */,
+				D89E33C51F1FCF030006F5A3 /* LaunchScreen.storyboard */,
+			);
+			name = iOS;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -320,12 +353,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D8FD39601F23EE11003A548B /* Kernel.swift in Sources */,
 				D89E33F71F1FCF650006F5A3 /* Cube.swift in Sources */,
 				D89E33FB1F1FCF650006F5A3 /* Shaders.metal in Sources */,
 				D89E33FD1F1FCF650006F5A3 /* Vertex.swift in Sources */,
+				D8FD39591F23E8EB003A548B /* App.swift in Sources */,
 				D89E33F91F1FCF650006F5A3 /* Matrix4.m in Sources */,
 				D8FD394B1F223AF3003A548B /* RenderPass.swift in Sources */,
 				D89E33F61F1FCF650006F5A3 /* AppDelegate.swift in Sources */,
+				D8FD395C1F23EAA2003A548B /* TouchMgr.swift in Sources */,
 				D89E33BF1F1FCF030006F5A3 /* ViewController.swift in Sources */,
 				D8FD39491F2234DE003A548B /* SubMesh.swift in Sources */,
 				D8FD39531F224564003A548B /* Uniforms.swift in Sources */,

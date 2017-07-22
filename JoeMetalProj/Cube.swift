@@ -28,10 +28,4 @@ class Cube: SubMesh
 
         super.init(device: device, world: world, vertices: verticesArray, name: "Cube")
     }
-  
-    override func update(delta: CFTimeInterval)
-    {
-        let dt = Float(delta)
-        uniforms.world.rotateAroundX(dt, y: dt, z: dt)
-    }
 }

@@ -41,20 +41,18 @@ class SubMesh
         
         self.pipelineState = try! device.makeRenderPipelineState(descriptor: pipelineStateDescriptor)
         
-        self.uniforms = PerSubMeshUniforms(device: device, binding: 2, world: world)
+        self.uniforms = PerSubMeshUniforms(binding: 2, world: world)
         self.device = device
         self.vertexCount = vertices.count
         self.name = name
     }
     
-    func update(delta: CFTimeInterval) {}
-    
-    func render(metalObjects: MetalObjects, renderEncoder: MTLRenderCommandEncoder)
+	func render(kernel: Kernel, renderEncoder: MTLRenderCommandEncoder)
     {
         renderEncoder.setRenderPipelineState(pipelineState)
         renderEncoder.setVertexBuffer(vertexBuffer, offset: 0, at: 0)
         
-        uniforms.bind(metalObjects: metalObjects, renderEncoder: renderEncoder)
+        uniforms.bind(device: kernel.device, renderEncoder: renderEncoder)
         
         renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertexCount, instanceCount: 1)
     }
