@@ -41,7 +41,8 @@
 
 
 - (void)scale:(float)x y:(float)y z:(float)z;
-- (void)rotateAroundX:(float)xAngleRad y:(float)yAngleRad z:(float)zAngleRad;
+- (void)rotate:(float)xAngleRad y:(float)yAngleRad z:(float)zAngleRad;
+- (void)rotate:(float)angleRad x:(float)x y:(float)y z:(float)z;
 - (void)translate:(float)x y:(float)y z:(float)z;
 - (void)multiplyLeft:(Matrix4 * _Nonnull)matrix;
 

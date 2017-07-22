@@ -21,8 +21,8 @@ class TouchMgr
 	}
 	
 	var status =			Status.noTouch
-	var swiping =           false
-	var lastPoint =         CGPoint()
+	var lastPoint =         (0.0, 0.0) as (Float, Float)
+	var lastDir =			(0.0, 0.0) as (Float, Float)
 	
 	func frame()
 	{
@@ -34,18 +34,25 @@ class TouchMgr
 		{
 			status = .touchHeld
 		}
+		//else if status == .touchSwiping
+		//{
+	//		status == .swipeHeld
+		//}
+		
+		lastDir = (0.0, 0.0)
 	}
 	
 	func touchStart(point: CGPoint)
 	{
 		status = .touchStarting
-		lastPoint = point
+		lastPoint = ((Float)(point.x), (Float)(point.y))
 	}
 	
 	func touchMove(point: CGPoint)
 	{
 		status = .swiping
-		let currentPoint = point
+		let currentPoint = ((Float)(point.x), (Float)(point.y))
+		lastDir = (currentPoint.0 - lastPoint.0, currentPoint.1 - lastPoint.1)
 		lastPoint = currentPoint
 	}
 	

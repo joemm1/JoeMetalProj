@@ -55,10 +55,14 @@
   glkMatrix = GLKMatrix4Scale(glkMatrix, x, y, z);
 }
 
-- (void)rotateAroundX:(float)xAngleRad y:(float)yAngleRad z:(float)zAngleRad{
+- (void)rotate:(float)xAngleRad y:(float)yAngleRad z:(float)zAngleRad{
   glkMatrix = GLKMatrix4Rotate(glkMatrix, xAngleRad, 1, 0, 0);
   glkMatrix = GLKMatrix4Rotate(glkMatrix, yAngleRad, 0, 1, 0);
   glkMatrix = GLKMatrix4Rotate(glkMatrix, zAngleRad, 0, 0, 1);
+}
+
+- (void)rotate:(float)angleRad x:(float)x y:(float)y z:(float)z{
+	glkMatrix = GLKMatrix4Rotate(glkMatrix, angleRad, x, y, z);
 }
 
 - (void)translate:(float)x y:(float)y z:(float)z{
