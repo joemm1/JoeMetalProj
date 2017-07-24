@@ -23,8 +23,9 @@ class Uniforms
         let uniformBuffer = device.makeBuffer(length: getSizeInBytes(), options: [])
         
         copyIn(buffer: uniformBuffer)
-
-        renderEncoder.setVertexBuffer(uniformBuffer, offset: 0, at: binding)
+		
+		renderEncoder.setVertexBuffer(uniformBuffer, offset: 0, at: binding)
+		renderEncoder.setFragmentBuffer(uniformBuffer, offset: 0, at: binding)
     }
     
     func copyIn(buffer: MTLBuffer)
@@ -67,7 +68,8 @@ class PerPassUniforms : Uniforms
 
 class PerSubMeshUniforms : Uniforms
 {
-    var world:   Matrix4
+    var world:		Matrix4
+	var colour:		(Float, Float, Float) = (1.0, 1.0, 1.0)
     
     init(binding: Int, world: Matrix4)
     {
@@ -77,13 +79,23 @@ class PerSubMeshUniforms : Uniforms
     
     override func copyIn(buffer: MTLBuffer)
     {
-        let dest = buffer.contents()
+        var dest = buffer.contents()
         
         memcpy(dest, world.raw(), 64)
+		dest = dest.advanced(by: 64)
+		
+		dest.storeBytes(of: colour.0, as: Float.self)
+		dest = dest.advanced(by: 4)
+		dest.storeBytes(of: colour.1, as: Float.self)
+		dest = dest.advanced(by: 4)
+		dest.storeBytes(of: colour.2, as: Float.self)
+		dest = dest.advanced(by: 4)
+		dest.storeBytes(of: 0.0, as: Float.self) //padding
+		dest = dest.advanced(by: 4)
     }
     
     override func getSizeInBytes() -> Int
     {
-        return 64
+        return 64 + 16
     }
 }

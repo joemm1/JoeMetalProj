@@ -49,6 +49,9 @@
 
 - (void * _Nonnull)raw;
 - (void)transpose;
+- (void)invert;
+
+- (Matrix4 * _Nonnull)getInverse;
 
 + (float)degreesToRad:(float)degrees;
 + (NSInteger)numberOfElements;

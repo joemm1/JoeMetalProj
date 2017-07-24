@@ -14,11 +14,15 @@ class App
 	let view:				UIView
 	let kernel:				Kernel
 	
-	let viewMatrix:			Matrix4
 	let projectionMatrix:   Matrix4
 	
-	var subMeshes =         Array<SubMesh>()
 	var touchMgr =			TouchMgr()
+	
+	var gameObjects =		Array<GameObject>()
+	
+	var player =			Player()
+	
+	let kNumEnemies =		100
 	
 	init(view: UIView)
 	{
@@ -28,37 +32,36 @@ class App
 		
 		projectionMatrix = Matrix4.makePerspectiveViewAngle(Matrix4.degrees(toRad: 85.0), aspectRatio: Float(view.bounds.size.width / view.bounds.size.height), nearZ: 0.01, farZ: 100.0)
 		
-		viewMatrix = Matrix4()
-		
-		let cubeWorld = Matrix4()
-		cubeWorld.translate(0.0, y: 0.0, z: -7.0)
-		let cube = Cube(device: kernel.device, world: cubeWorld)
-		subMeshes.append(cube)
+		for _ in 0..<kNumEnemies
+		{
+			let obj = Enemy(device: kernel.device)
+			gameObjects.append(obj)
+		}
 	}
 	
 	func update(delta: CFTimeInterval)
 	{
 		let dt = Float(delta)
 		
-		if touchMgr.status == .touchHeld
+		player.update(dt, touchMgr: touchMgr)
+		for obj in gameObjects
 		{
-			subMeshes[0].uniforms.world.scale(0.99, y: 0.99, z: 0.99)
+			obj.update(dt)
 		}
-		
-		if touchMgr.status == .swiping && touchMgr.lastDir != (0, 0)
-		{
-			viewMatrix.rotate(dt, x: -touchMgr.lastDir.1, y: -touchMgr.lastDir.0, z: 0.0)
-		}
-
-		subMeshes[0].uniforms.world.rotate(dt, y: dt, z: dt)
 		
 		touchMgr.frame()
 	}
 	
 	func render()
 	{
+		var subMeshes = Array<SubMesh>()
+		for obj in gameObjects
+		{
+			subMeshes.append(obj.subMesh)
+		}
+		
 		let clearColour = MTLClearColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1.0)
-		let perPassUniforms = PerPassUniforms(binding: 1, view: viewMatrix, proj: projectionMatrix)
+		let perPassUniforms = PerPassUniforms(binding: 1, view: player.viewMatrix, proj: projectionMatrix)
 		
 		let renderPass = RenderPass()
 		renderPass.render(kernel: kernel, clearColour: clearColour, perPassUniforms: perPassUniforms, subMeshes: subMeshes)

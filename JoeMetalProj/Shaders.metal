@@ -4,13 +4,13 @@ using namespace metal;
 struct VertexIn
 {
     packed_float3 position;
-    packed_float4 color;
+    packed_float3 normal;
 };
 
 struct VertexOut
 {
     float4 position [[position]];
-    float4 color;
+    float3 normal;
 };
 
 struct PerPassUniforms
@@ -22,6 +22,7 @@ struct PerPassUniforms
 struct PerSubMeshUniforms
 {
     float4x4 world;
+	float3 colour;
 };
 
 vertex VertexOut basic_vertex(
@@ -34,12 +35,20 @@ vertex VertexOut basic_vertex(
 
     VertexOut VertexOut;
     VertexOut.position = perPass.proj * perPass.view * perSubMesh.world * float4(VertexIn.position,1);
-    VertexOut.color = VertexIn.color;
+	float3x3 world3x3(perSubMesh.world[0].xyz, perSubMesh.world[1].xyz, perSubMesh.world[2].xyz);
+    VertexOut.normal = world3x3 * float3(VertexIn.normal);
 
     return VertexOut;
 }
 
-fragment half4 basic_fragment(VertexOut interpolated [[stage_in]])
+fragment half4 basic_fragment(VertexOut interpolated						[[stage_in]],
+							  const device PerSubMeshUniforms& perSubMesh   [[ buffer(2) ]])
 {
-    return half4(interpolated.color[0], interpolated.color[1], interpolated.color[2], interpolated.color[3]);
+	const float3 kLightDir = float3(-0.7f, 0.7f, 0.7f);
+	const float3 kAmbientLightColour = float3(0.2, 0.2, 0.2);
+	
+	float3 diffuse = saturate(dot(interpolated.normal, kLightDir));
+	float3 ambient = kAmbientLightColour;
+	float4 col((diffuse + ambient) * perSubMesh.colour, 1);
+	return (half4)col;
 }

@@ -45,6 +45,13 @@ class RenderPass
         
         //pass state
         renderEncoder.setCullMode(MTLCullMode.front)
+		
+		
+		let depthDesc = MTLDepthStencilDescriptor()
+		depthDesc.isDepthWriteEnabled = true
+		depthDesc.depthCompareFunction = .less
+		let depthStencilState = kernel.device.makeDepthStencilState(descriptor: depthDesc)
+		renderEncoder.setDepthStencilState(depthStencilState)
 
         //iterate over submeshes
         for subMesh in subMeshes

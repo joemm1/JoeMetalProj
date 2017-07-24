@@ -49,6 +49,13 @@
   return mCopy;
 }
 
+- (Matrix4 * _Nonnull)getInverse{
+	Matrix4 *mCopy = [[Matrix4 alloc] init];
+	mCopy->glkMatrix = self->glkMatrix;
+	GLKMatrix4Invert(mCopy->glkMatrix, NULL);
+	return mCopy;
+}
+
 #pragma mark - Matrix transformation
 
 - (void)scale:(float)x y:(float)y z:(float)z{
@@ -81,6 +88,10 @@
 
 - (void)transpose{
   glkMatrix = GLKMatrix4Transpose(glkMatrix);
+}
+
+- (void)invert{
+	glkMatrix = GLKMatrix4Invert(glkMatrix, NULL);
 }
 
 + (float)degreesToRad:(float)degrees{
