@@ -8,6 +8,7 @@
 
 import Foundation
 import Metal
+import simd
 
 class Uniforms
 {
@@ -42,10 +43,10 @@ class Uniforms
 
 class PerPassUniforms : Uniforms
 {
-    var view:   Matrix4
-    var proj:   Matrix4
+    var view:   float4x4
+    var proj:   float4x4
     
-	init(binding: Int, view: Matrix4, proj: Matrix4)
+	init(binding: Int, view: float4x4, proj: float4x4)
     {
         self.view = view
         self.proj = proj
@@ -56,8 +57,8 @@ class PerPassUniforms : Uniforms
     {
         let dest = buffer.contents()
         
-        memcpy(dest, view.raw(), 64)
-        memcpy(dest + 64, proj.raw(), 64)
+        memcpy(dest, &view, 64)
+        memcpy(dest + 64, &proj, 64)
     }
     
     override func getSizeInBytes() -> Int
@@ -68,10 +69,10 @@ class PerPassUniforms : Uniforms
 
 class PerSubMeshUniforms : Uniforms
 {
-    var world:		Matrix4
-	var colour:		(Float, Float, Float) = (1.0, 1.0, 1.0)
-    
-    init(binding: Int, world: Matrix4)
+	var world :		float4x4
+	var colour =	float3(1.0, 1.0, 1.0)
+	
+    init(binding: Int, world: float4x4)
     {
         self.world = world
         super.init(binding: binding)
@@ -81,21 +82,15 @@ class PerSubMeshUniforms : Uniforms
     {
         var dest = buffer.contents()
         
-        memcpy(dest, world.raw(), 64)
-		dest = dest.advanced(by: 64)
+		memcpy(dest, &world, MemoryLayout<float4x4>.stride)
+		dest = dest.advanced(by: MemoryLayout<float4x4>.stride)
 		
-		dest.storeBytes(of: colour.0, as: Float.self)
-		dest = dest.advanced(by: 4)
-		dest.storeBytes(of: colour.1, as: Float.self)
-		dest = dest.advanced(by: 4)
-		dest.storeBytes(of: colour.2, as: Float.self)
-		dest = dest.advanced(by: 4)
-		dest.storeBytes(of: 0.0, as: Float.self) //padding
-		dest = dest.advanced(by: 4)
+		memcpy(dest, &colour, MemoryLayout<float3>.stride)
+		dest = dest.advanced(by: MemoryLayout<float3>.stride)
     }
     
     override func getSizeInBytes() -> Int
     {
-        return 64 + 16
+        return MemoryLayout<float4x4>.stride + MemoryLayout<float3>.stride
     }
 }

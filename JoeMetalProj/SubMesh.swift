@@ -8,6 +8,7 @@
 
 import Foundation
 import Metal
+import simd
 
 class SubMesh
 {
@@ -18,7 +19,7 @@ class SubMesh
     let pipelineState:      MTLRenderPipelineState
     var uniforms:           PerSubMeshUniforms
     
-    init(device: MTLDevice, world: Matrix4, vertices: Array<Vertex>, name: String)
+    init(device: MTLDevice, world: float4x4, vertices: Array<Vertex>, name: String)
     {
         var vertexData = Array<Float>()
         for vertex in vertices

@@ -8,13 +8,14 @@
 
 import Foundation
 import Metal
+import GLKit
 
 class App
 {
 	let view:				UIView
 	let kernel:				Kernel
 	
-	let projectionMatrix:   Matrix4
+	let projectionMatrix:   float4x4
 	
 	var touchMgr =			TouchMgr()
 	
@@ -22,7 +23,7 @@ class App
 	
 	var player =			Player()
 	
-	let kNumEnemies =		100
+	let kNumEnemies =		250
 	
 	init(view: UIView)
 	{
@@ -30,7 +31,7 @@ class App
 		
 		kernel = Kernel(view)
 		
-		projectionMatrix = Matrix4.makePerspectiveViewAngle(Matrix4.degrees(toRad: 85.0), aspectRatio: Float(view.bounds.size.width / view.bounds.size.height), nearZ: 0.01, farZ: 100.0)
+		projectionMatrix = float4x4.makePerspectiveViewAngle(Utils.ToRads(degs: 85.0), aspectRatio: Float(view.bounds.size.width / view.bounds.size.height), nearZ: 0.01, farZ: 100.0)
 		
 		for _ in 0..<kNumEnemies
 		{

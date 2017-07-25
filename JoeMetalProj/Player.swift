@@ -7,26 +7,40 @@
 //
 
 import Foundation
+import simd
 
 class Player
 {
-	let viewMatrix =		Matrix4()
-	var xSwipeVelocity =	0.0 as Float
+	var cameraTransform =					float4x4()
+	var viewMatrix:							float4x4 { return cameraTransform.inverse }
+	
+	var swipeVelocity =						float2(0.0, 0.0)
 
 	func update(_ dt: Float, touchMgr: TouchMgr)
 	{
+		var translate = cameraTransform[3]
+		cameraTransform[3] = float4(0, 0, 0, 1)
+		
 		if touchMgr.status == .swiping
 		{
-			xSwipeVelocity = touchMgr.lastDir.0
+			swipeVelocity = float2(touchMgr.lastDir.0, touchMgr.lastDir.1)
 		}
 		else
 		{
-			xSwipeVelocity *= 0.9
+			swipeVelocity *= 0.9
 		}
 		
-		if abs(xSwipeVelocity) > 0.01
+		if abs(swipeVelocity.x) > 0.01
 		{
-			viewMatrix.rotate(dt * xSwipeVelocity * 0.2, x: 0, y: 1, z: 0.0)
+			cameraTransform.rotate(-dt * swipeVelocity.x * 0.2, axis: float3(0, 1, 0))
 		}
+
+		var negZ = float4(0.0, 0.0, 1.0, 0.0)
+		negZ = cameraTransform * negZ
+		translate += negZ * dt * swipeVelocity.y
+		translate.w = 1
+		
+		cameraTransform[3] = translate
+		
 	}
 }

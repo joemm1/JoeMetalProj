@@ -1,9 +1,10 @@
 import Foundation
 import Metal
+import simd
 
 class Cube: SubMesh
 {
-    init(device: MTLDevice, world: Matrix4)
+    init(device: MTLDevice, world: float4x4)
 	{
 		//top
 		let top0 = Vertex(x: -1.0, y:   1.0, z:  -1.0, nx:  0.0, ny:  1.0, nz:  0.0)

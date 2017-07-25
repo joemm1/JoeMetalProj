@@ -8,6 +8,7 @@
 
 import Foundation
 import Metal
+import UIKit
 
 class Kernel
 {

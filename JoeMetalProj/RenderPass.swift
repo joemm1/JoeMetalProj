@@ -8,6 +8,7 @@
 
 import Foundation
 import Metal
+import QuartzCore
 
 class MetalObjects
 {

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import simd
 
 class Utils
 {
@@ -21,5 +22,10 @@ class Utils
 		let randInt = RandomInt(min: (Int)(min * 1000.0), max: (Int)(max * 1000.0))
 		let randFloat = (Float)(randInt) / 1000.0
 		return randFloat
+	}
+	
+	static func ToRads(degs: Float) -> Float
+	{
+		return degs * .pi / 180.0;
 	}
 }

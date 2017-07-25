@@ -7,34 +7,38 @@
 //
 
 import Foundation
+import Metal
+import simd
 
 class Enemy : GameObject
 {
-	let rx = Utils.RandomFloat(min: -1.0, max: 1.0)
-	let ry = Utils.RandomFloat(min: -1.0, max: 1.0)
-	let rz = Utils.RandomFloat(min: -1.0, max: 1.0)
+	let translation:		float4
+	let rotAxis:			float3
+	var rads =				0.0 as Float
 	
 	init(device: MTLDevice)
 	{
-		let theta = Utils.RandomFloat(min: 0.0, max: 2.0 * 3.141592654)
-		let r = Utils.RandomFloat(min: 5.0, max: 20.0)
+		let rx = Utils.RandomFloat(min: -1.0, max: 1.0)
+		let ry = Utils.RandomFloat(min: -1.0, max: 1.0)
+		let rz = Utils.RandomFloat(min: -1.0, max: 1.0)
+		rotAxis = float3(rx, ry,rz)
+		
+		let theta = Utils.RandomFloat(min: 0.0, max: 2.0 * .pi)
+		let r = Utils.RandomFloat(min: 2.0, max: 40.0)
 		let y = Utils.RandomFloat(min: -4.0, max: 4.0)
+		translation = float4(r * cos(theta), y, r * sin(theta), 1)
 		
-		let world = Matrix4()
-		world.translate(r * cos(theta), y: y, z: r * sin(theta))
-		world.scale(0.5, y: 0.5, z: 0.5)
-		
-		super.init(subMesh: Cube(device: device, world: world))
-		subMesh.uniforms.colour =
-			(
-				Utils.RandomFloat(min: 0.0, max: 1.0),
-				Utils.RandomFloat(min: 0.0, max: 1.0),
-				Utils.RandomFloat(min: 0.0, max: 1.0)
-			);
+		super.init(subMesh: Cube(device: device, world: float4x4()))
+		subMesh.uniforms.colour = float3(Utils.RandomFloat(min: 0.0, max: 1.0),
+		                                 Utils.RandomFloat(min: 0.0, max: 1.0),
+		                                 Utils.RandomFloat(min: 0.0, max: 1.0));
 	}
 	
 	override func update(_ dt: Float)
 	{
-		subMesh.uniforms.world.rotate(dt * rx, y: dt * ry, z: dt * rz)
+		rads += dt
+		subMesh.uniforms.world = float4x4.makeScale(0.5, 0.5, 0.5)
+		subMesh.uniforms.world.rotate(rads, axis: rotAxis)
+		subMesh.uniforms.world[3] = translation
 	}
 }
