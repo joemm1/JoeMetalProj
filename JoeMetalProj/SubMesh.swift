@@ -28,12 +28,12 @@ class SubMesh
         }
         
         let dataSize = vertexData.count * MemoryLayout.size(ofValue: vertexData[0])
-        vertexBuffer = device.makeBuffer(bytes: vertexData, length: dataSize, options: [])
+        vertexBuffer = device.makeBuffer(bytes: vertexData, length: dataSize, options: [])!
         
         //#todo: move to Shader class etc
-        let defaultLibrary = device.newDefaultLibrary()!
-        let fragmentProgram = defaultLibrary.makeFunction(name: "basic_fragment")
-        let vertexProgram = defaultLibrary.makeFunction(name: "basic_vertex")
+		let defaultLibrary = device.makeDefaultLibrary()!
+        let fragmentProgram = defaultLibrary.makeFunction(name: "basic_fragment")!
+        let vertexProgram = defaultLibrary.makeFunction(name: "basic_vertex")!
         
         let pipelineStateDescriptor = MTLRenderPipelineDescriptor()
         pipelineStateDescriptor.vertexFunction = vertexProgram
@@ -51,7 +51,7 @@ class SubMesh
 	func render(kernel: Kernel, renderEncoder: MTLRenderCommandEncoder)
     {
         renderEncoder.setRenderPipelineState(pipelineState)
-        renderEncoder.setVertexBuffer(vertexBuffer, offset: 0, at: 0)
+		renderEncoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
         
         uniforms.bind(device: kernel.device, renderEncoder: renderEncoder)
         

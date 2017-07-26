@@ -21,12 +21,12 @@ class Uniforms
     
 	func bind(device: MTLDevice, renderEncoder: MTLRenderCommandEncoder)
     {
-        let uniformBuffer = device.makeBuffer(length: getSizeInBytes(), options: [])
+        let uniformBuffer = device.makeBuffer(length: getSizeInBytes(), options: [])!
         
         copyIn(buffer: uniformBuffer)
 		
-		renderEncoder.setVertexBuffer(uniformBuffer, offset: 0, at: binding)
-		renderEncoder.setFragmentBuffer(uniformBuffer, offset: 0, at: binding)
+		renderEncoder.setVertexBuffer(uniformBuffer, offset: 0, index: binding)
+		renderEncoder.setFragmentBuffer(uniformBuffer, offset: 0, index: binding)
     }
     
     func copyIn(buffer: MTLBuffer)

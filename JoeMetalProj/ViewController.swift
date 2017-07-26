@@ -18,7 +18,7 @@ class ViewController: UIViewController
         timer.add(to: RunLoop.main, forMode: RunLoopMode.defaultRunLoopMode)
     }
 
-    func newFrame(displayLink: CADisplayLink)
+    @objc func newFrame(displayLink: CADisplayLink)
     {
         if lastFrameTimestamp == 0.0
         {

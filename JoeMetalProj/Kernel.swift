@@ -27,6 +27,6 @@ class Kernel
 		metalLayer.frame = view.layer.frame
 		view.layer.addSublayer(metalLayer)
 		
-		commandQueue = device.makeCommandQueue()
+		commandQueue = device.makeCommandQueue()!
 	}
 }

@@ -38,8 +38,8 @@ class RenderPass
         renderPassDescriptor.colorAttachments[0].storeAction = .store
         
         //cmd encoder
-        let commandBuffer = kernel.commandQueue.makeCommandBuffer()
-        let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)
+        let commandBuffer = kernel.commandQueue.makeCommandBuffer()!
+        let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)!
 
         //per-pass uniforms
         perPassUniforms.bind(device: kernel.device, renderEncoder: renderEncoder)
@@ -51,7 +51,7 @@ class RenderPass
 		let depthDesc = MTLDepthStencilDescriptor()
 		depthDesc.isDepthWriteEnabled = true
 		depthDesc.depthCompareFunction = .less
-		let depthStencilState = kernel.device.makeDepthStencilState(descriptor: depthDesc)
+		let depthStencilState = kernel.device.makeDepthStencilState(descriptor: depthDesc)!
 		renderEncoder.setDepthStencilState(depthStencilState)
 
         //iterate over submeshes
