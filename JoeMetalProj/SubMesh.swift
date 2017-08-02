@@ -12,49 +12,59 @@ import simd
 
 class SubMesh
 {
-    let device:             MTLDevice
     let name:               String
-    let vertexCount:        Int
-    let vertexBuffer:       MTLBuffer
+	let shaderSet:			ShaderSet
     let pipelineState:      MTLRenderPipelineState
     var uniforms:           PerSubMeshUniforms
     
-    init(device: MTLDevice, world: float4x4, vertices: Array<Vertex>, name: String)
+	init(kernel: Kernel, shaderSet: ShaderSet, world: float4x4, name: String)
     {
-        var vertexData = Array<Float>()
-        for vertex in vertices
-        {
-            vertexData += vertex.floatBuffer()
-        }
-        
-        let dataSize = vertexData.count * MemoryLayout.size(ofValue: vertexData[0])
-        vertexBuffer = device.makeBuffer(bytes: vertexData, length: dataSize, options: [])!
-        
-        //#todo: move to Shader class etc
-		let defaultLibrary = device.makeDefaultLibrary()!
-        let fragmentProgram = defaultLibrary.makeFunction(name: "basic_fragment")!
-        let vertexProgram = defaultLibrary.makeFunction(name: "basic_vertex")!
+		self.shaderSet = shaderSet
         
         let pipelineStateDescriptor = MTLRenderPipelineDescriptor()
-        pipelineStateDescriptor.vertexFunction = vertexProgram
-        pipelineStateDescriptor.fragmentFunction = fragmentProgram
+        pipelineStateDescriptor.vertexFunction = shaderSet.vertexProgram
+        pipelineStateDescriptor.fragmentFunction = shaderSet.fragmentProgram
         pipelineStateDescriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
         
-        self.pipelineState = try! device.makeRenderPipelineState(descriptor: pipelineStateDescriptor)
+        self.pipelineState = try! kernel.device.makeRenderPipelineState(descriptor: pipelineStateDescriptor)
         
         self.uniforms = PerSubMeshUniforms(binding: 2, world: world)
-        self.device = device
-        self.vertexCount = vertices.count
         self.name = name
     }
     
 	func render(kernel: Kernel, renderEncoder: MTLRenderCommandEncoder)
     {
         renderEncoder.setRenderPipelineState(pipelineState)
-		renderEncoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
-        
-        uniforms.bind(device: kernel.device, renderEncoder: renderEncoder)
-        
-        renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertexCount, instanceCount: 1)
+		uniforms.bind(device: kernel.device, renderEncoder: renderEncoder)
     }
+}
+
+class SubMeshPrimitive: SubMesh
+{
+	let vertexCount:        Int
+	let vertexBuffer:       MTLBuffer
+	
+	init(kernel: Kernel, shaderSet: ShaderSet, world: float4x4, vertices: Array<Vertex>, name: String)
+	{
+		var vertexData = Array<Float>()
+		for vertex in vertices
+		{
+			vertexData += vertex.floatBuffer()
+		}
+		
+		let dataSize = vertexData.count * MemoryLayout.size(ofValue: vertexData[0])
+		vertexBuffer = kernel.device.makeBuffer(bytes: vertexData, length: dataSize, options: [])!
+		
+		self.vertexCount = vertices.count
+		
+		super.init(kernel: kernel, shaderSet: shaderSet, world: world, name: name)
+	}
+	
+	override func render(kernel: Kernel, renderEncoder: MTLRenderCommandEncoder)
+	{
+		super.render(kernel: kernel, renderEncoder: renderEncoder)
+		
+		renderEncoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
+		renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertexCount, instanceCount: 1)
+	}
 }

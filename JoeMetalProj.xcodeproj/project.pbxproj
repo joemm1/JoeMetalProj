@@ -9,6 +9,10 @@
 /* Begin PBXBuildFile section */
 		D8240CC91F26A0C0005CFDF4 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8240CC81F26A0C0005CFDF4 /* Player.swift */; };
 		D8240CD01F27BAD6005CFDF4 /* float4x4+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8240CCF1F27BAD6005CFDF4 /* float4x4+Extensions.swift */; };
+		D87C49461F30F59D0071EF45 /* Shader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D87C49451F30F59D0071EF45 /* Shader.swift */; };
+		D87C49481F31BC630071EF45 /* Physics.metal in Sources */ = {isa = PBXBuildFile; fileRef = D87C49471F31BC630071EF45 /* Physics.metal */; };
+		D87C494A1F31BF1C0071EF45 /* Particle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D87C49491F31BF1C0071EF45 /* Particle.swift */; };
+		D87C494C1F32449E0071EF45 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = D87C494B1F32449E0071EF45 /* Model.swift */; };
 		D89E33BF1F1FCF030006F5A3 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D89E33BE1F1FCF030006F5A3 /* ViewController.swift */; };
 		D89E33C21F1FCF030006F5A3 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D89E33C01F1FCF030006F5A3 /* Main.storyboard */; };
 		D89E33C41F1FCF030006F5A3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D89E33C31F1FCF030006F5A3 /* Assets.xcassets */; };
@@ -50,6 +54,11 @@
 /* Begin PBXFileReference section */
 		D8240CC81F26A0C0005CFDF4 /* Player.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
 		D8240CCF1F27BAD6005CFDF4 /* float4x4+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "float4x4+Extensions.swift"; sourceTree = "<group>"; };
+		D87C49441F30F3770071EF45 /* ShadersArgBuf.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = ShadersArgBuf.metal; sourceTree = "<group>"; };
+		D87C49451F30F59D0071EF45 /* Shader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shader.swift; sourceTree = "<group>"; };
+		D87C49471F31BC630071EF45 /* Physics.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Physics.metal; sourceTree = "<group>"; };
+		D87C49491F31BF1C0071EF45 /* Particle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Particle.swift; sourceTree = "<group>"; };
+		D87C494B1F32449E0071EF45 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
 		D89E33B91F1FCF030006F5A3 /* JoeMetalProj.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JoeMetalProj.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D89E33BE1F1FCF030006F5A3 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		D89E33C11F1FCF030006F5A3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -171,6 +180,8 @@
 				D8FD39521F224564003A548B /* Uniforms.swift */,
 				D8FD39481F2234DE003A548B /* SubMesh.swift */,
 				D8FD394A1F223AF3003A548B /* RenderPass.swift */,
+				D87C49451F30F59D0071EF45 /* Shader.swift */,
+				D87C494B1F32449E0071EF45 /* Model.swift */,
 			);
 			name = Renderer;
 			sourceTree = "<group>";
@@ -179,6 +190,8 @@
 			isa = PBXGroup;
 			children = (
 				D89E33F21F1FCF650006F5A3 /* Shaders.metal */,
+				D87C49441F30F3770071EF45 /* ShadersArgBuf.metal */,
+				D87C49471F31BC630071EF45 /* Physics.metal */,
 			);
 			name = Shaders;
 			sourceTree = "<group>";
@@ -189,6 +202,7 @@
 				D89E33EA1F1FCF640006F5A3 /* JoeMetalProj-Bridging-Header.h */,
 				D8240CCF1F27BAD6005CFDF4 /* float4x4+Extensions.swift */,
 				D8FD39651F240BAF003A548B /* Utils.swift */,
+				D87C49491F31BF1C0071EF45 /* Particle.swift */,
 			);
 			name = Maths;
 			sourceTree = "<group>";
@@ -366,9 +380,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				D8FD39601F23EE11003A548B /* Kernel.swift in Sources */,
+				D87C49461F30F59D0071EF45 /* Shader.swift in Sources */,
 				D89E33F71F1FCF650006F5A3 /* Cube.swift in Sources */,
 				D89E33FB1F1FCF650006F5A3 /* Shaders.metal in Sources */,
 				D89E33FD1F1FCF650006F5A3 /* Vertex.swift in Sources */,
+				D87C494A1F31BF1C0071EF45 /* Particle.swift in Sources */,
+				D87C49481F31BC630071EF45 /* Physics.metal in Sources */,
 				D8240CC91F26A0C0005CFDF4 /* Player.swift in Sources */,
 				D8240CD01F27BAD6005CFDF4 /* float4x4+Extensions.swift in Sources */,
 				D8FD39621F24050D003A548B /* GameObject.swift in Sources */,
@@ -377,6 +394,7 @@
 				D8FD394B1F223AF3003A548B /* RenderPass.swift in Sources */,
 				D89E33F61F1FCF650006F5A3 /* AppDelegate.swift in Sources */,
 				D8FD395C1F23EAA2003A548B /* TouchMgr.swift in Sources */,
+				D87C494C1F32449E0071EF45 /* Model.swift in Sources */,
 				D8FD39641F240558003A548B /* Enemy.swift in Sources */,
 				D89E33BF1F1FCF030006F5A3 /* ViewController.swift in Sources */,
 				D8FD39491F2234DE003A548B /* SubMesh.swift in Sources */,
@@ -488,6 +506,8 @@
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_SWIFT3_OBJC_INFERENCE = Off;
+				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -537,6 +557,8 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_SWIFT3_OBJC_INFERENCE = Off;
+				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};

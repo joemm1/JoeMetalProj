@@ -17,8 +17,14 @@ class ViewController: UIViewController
         timer = CADisplayLink(target: self, selector: #selector(ViewController.newFrame(displayLink:)))
         timer.add(to: RunLoop.main, forMode: RunLoopMode.defaultRunLoopMode)
     }
+	
+	override func viewDidLayoutSubviews()
+	{
+		super.viewDidLayoutSubviews()
+		app.updateSubViews()
+	}
 
-    @objc func newFrame(displayLink: CADisplayLink)
+	@objc func newFrame(displayLink: CADisplayLink)
     {
         if lastFrameTimestamp == 0.0
         {

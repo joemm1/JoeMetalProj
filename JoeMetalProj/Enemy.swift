@@ -16,7 +16,7 @@ class Enemy : GameObject
 	let rotAxis:			float3
 	var rads =				0.0 as Float
 	
-	init(device: MTLDevice)
+	init(kernel: Kernel, shaderSet: ShaderSet)
 	{
 		let rx = Utils.RandomFloat(min: -1.0, max: 1.0)
 		let ry = Utils.RandomFloat(min: -1.0, max: 1.0)
@@ -28,7 +28,7 @@ class Enemy : GameObject
 		let y = Utils.RandomFloat(min: -4.0, max: 4.0)
 		translation = float4(r * cos(theta), y, r * sin(theta), 1)
 		
-		super.init(subMesh: Cube(device: device, world: float4x4()))
+		super.init(subMesh: Cube(kernel: kernel, shaderSet: shaderSet, world: float4x4()))
 		subMesh.uniforms.colour = float3(Utils.RandomFloat(min: 0.0, max: 1.0),
 		                                 Utils.RandomFloat(min: 0.0, max: 1.0),
 		                                 Utils.RandomFloat(min: 0.0, max: 1.0));
