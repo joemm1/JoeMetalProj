@@ -17,13 +17,13 @@ class ShaderSet
 	enum ArgBufType: Int
 	{
 		case perPass = 1
-		case perSubMesh
+		case perMesh
 	}
 	
-	init(kernel: Kernel, vsName: String, fsName: String)
+	init(kernel: Kernel, vsName: String, fsName: String, fnConstantValues: MTLFunctionConstantValues)
 	{
-		vertexProgram = kernel.defaultLibrary.makeFunction(name: vsName)!
-		fragmentProgram = kernel.defaultLibrary.makeFunction(name: fsName)!
+		vertexProgram = try! kernel.defaultLibrary.makeFunction(name: vsName, constantValues: fnConstantValues)
+		fragmentProgram = try! kernel.defaultLibrary.makeFunction(name: fsName, constantValues: fnConstantValues)
 		
 		//let argEncoder = vertexProgram.makeArgumentEncoder(bufferIndex: ArgBufType.perPass.rawValue)
 	}

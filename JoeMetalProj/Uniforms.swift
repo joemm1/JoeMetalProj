@@ -10,23 +10,23 @@ import Foundation
 import Metal
 import simd
 
-class Uniforms
+class Uniforms : Buffer
 {
-    let binding: Int
+	enum BindingSlots : Int
+	{
+		case kPerPass = 1
+		case kPerMesh
+	}
 
-	init(binding: Int)
+	init(device: MTLDevice, binding: Int)
     {
-        self.binding = binding;
+		super.init(device: device, sizeInBytes: getSizeInBytes(), slot: binding)
     }
     
-	func bind(device: MTLDevice, renderEncoder: MTLRenderCommandEncoder)
+	override func bind(renderEncoder: MTLRenderCommandEncoder)
     {
-        let uniformBuffer = device.makeBuffer(length: getSizeInBytes(), options: [])!
-        
-        copyIn(buffer: uniformBuffer)
-		
-		renderEncoder.setVertexBuffer(uniformBuffer, offset: 0, index: binding)
-		renderEncoder.setFragmentBuffer(uniformBuffer, offset: 0, index: binding)
+        copyIn(buffer: super.mtlBuffer)
+		super.bind(renderEncoder: renderEncoder)
     }
     
     func copyIn(buffer: MTLBuffer)
@@ -43,39 +43,47 @@ class Uniforms
 
 class PerPassUniforms : Uniforms
 {
-    var view:   float4x4
-    var proj:   float4x4
-    
-	init(binding: Int, view: float4x4, proj: float4x4)
-    {
-        self.view = view
-        self.proj = proj
-        super.init(binding: binding)
-    }
+    var view =   			float4x4()
+    var proj =   			float4x4()
+	var pickRect =			float4()
+	
+	init(device: MTLDevice)
+	{
+		super.init(device: device, binding: BindingSlots.kPerPass.rawValue)
+	}
     
     override func copyIn(buffer: MTLBuffer)
     {
-        let dest = buffer.contents()
+        var dest = buffer.contents()
         
-        memcpy(dest, &view, 64)
-        memcpy(dest + 64, &proj, 64)
+        memcpy(dest, &view, MemoryLayout<float4x4>.stride)
+		dest = dest.advanced(by: MemoryLayout<float4x4>.stride)
+		
+        memcpy(dest, &proj, MemoryLayout<float4x4>.stride)
+		dest = dest.advanced(by: MemoryLayout<float4x4>.stride)
+		
+		memcpy(dest, &pickRect, MemoryLayout<float4>.stride)
+		dest = dest.advanced(by: MemoryLayout<float4>.stride)
     }
     
     override func getSizeInBytes() -> Int
     {
-        return 64 * 2
+		return MemoryLayout<float4x4>.stride + MemoryLayout<float4x4>.stride + MemoryLayout<float4>.stride
     }
 }
 
-class PerSubMeshUniforms : Uniforms
+class PerMeshUniforms : Uniforms
 {
-	var world :		float4x4
-	var colour =	float3(1.0, 1.0, 1.0)
+	var world =				float4x4()
+	var colour =			float3(1.0, 1.0, 1.0)
+	var id =				int4()
+	static var nextId:		Int32 = 0
 	
-    init(binding: Int, world: float4x4)
+	init(device: MTLDevice)
     {
-        self.world = world
-        super.init(binding: binding)
+		self.id.x = PerMeshUniforms.nextId
+		PerMeshUniforms.nextId = PerMeshUniforms.nextId + 1
+		super.init(device: device, binding: BindingSlots.kPerMesh.rawValue)
     }
     
     override func copyIn(buffer: MTLBuffer)
@@ -87,10 +95,13 @@ class PerSubMeshUniforms : Uniforms
 		
 		memcpy(dest, &colour, MemoryLayout<float3>.stride)
 		dest = dest.advanced(by: MemoryLayout<float3>.stride)
+		
+		memcpy(dest, &id, MemoryLayout<Int>.stride)
+		dest = dest.advanced(by: MemoryLayout<Int>.stride)
     }
     
     override func getSizeInBytes() -> Int
     {
-        return MemoryLayout<float4x4>.stride + MemoryLayout<float3>.stride
+        return MemoryLayout<float4x4>.stride + MemoryLayout<float3>.stride + MemoryLayout<int4>.stride
     }
 }

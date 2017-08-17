@@ -18,6 +18,8 @@ class Kernel
 	var commandQueue:       MTLCommandQueue
 	let textureLoader:		MTKTextureLoader
 	let defaultLibrary:		MTLLibrary
+	let mtkBufAllocator: 	MTKMeshBufferAllocator
+	var depthTex:			MTLTexture?
 
 	init(view: UIView)
 	{
@@ -31,8 +33,8 @@ class Kernel
 		
 		commandQueue = device.makeCommandQueue()!
 		defaultLibrary = device.makeDefaultLibrary()!
-		
 		textureLoader = MTKTextureLoader(device: device)
+		mtkBufAllocator = MTKMeshBufferAllocator(device: device)
 	}
 	
 	func updateSubViews(view: UIView)
@@ -45,6 +47,15 @@ class Kernel
 			view.contentScaleFactor = scale
 			metalLayer.frame = CGRect(x: 0, y: 0, width: layerSize.width, height: layerSize.height)
 			metalLayer.drawableSize = CGSize(width: layerSize.width * scale, height: layerSize.height * scale)
+			
+			let depthTexDesc = MTLTextureDescriptor()
+			depthTexDesc.pixelFormat = .depth32Float
+			depthTexDesc.width = Int(metalLayer.drawableSize.width)
+			depthTexDesc.height = Int(metalLayer.drawableSize.height)
+			depthTexDesc.mipmapLevelCount = 1
+			depthTexDesc.storageMode = .private
+			depthTexDesc.usage = .renderTarget
+			depthTex = device.makeTexture(descriptor: depthTexDesc)!
 		}
 	}
 }

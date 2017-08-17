@@ -10,35 +10,76 @@ import Foundation
 import Metal
 import simd
 
+struct EnemyDesc
+{
+	let prob:			Float
+	let mesh:			Mesh
+	let scale:			Float
+	let fullRotate:		Bool
+	let colour:			float3
+	
+	init(prob: Float, mesh: Mesh, colour: float3, scale: Float, fullRotate: Bool)
+	{
+		self.prob = prob
+		self.mesh = mesh
+		self.scale = scale
+		self.fullRotate = fullRotate
+		self.colour = colour
+	}
+}
+
 class Enemy : GameObject
 {
 	let translation:		float4
-	let rotAxis:			float3
+	var rotAxis:			float3
 	var rads =				0.0 as Float
 	
-	init(kernel: Kernel, shaderSet: ShaderSet)
+	init(kernel: Kernel, enemyDescs: [EnemyDesc])
 	{
 		let rx = Utils.RandomFloat(min: -1.0, max: 1.0)
 		let ry = Utils.RandomFloat(min: -1.0, max: 1.0)
 		let rz = Utils.RandomFloat(min: -1.0, max: 1.0)
-		rotAxis = float3(rx, ry,rz)
 		
 		let theta = Utils.RandomFloat(min: 0.0, max: 2.0 * .pi)
 		let r = Utils.RandomFloat(min: 2.0, max: 40.0)
 		let y = Utils.RandomFloat(min: -4.0, max: 4.0)
 		translation = float4(r * cos(theta), y, r * sin(theta), 1)
 		
-		super.init(subMesh: Cube(kernel: kernel, shaderSet: shaderSet, world: float4x4()))
-		subMesh.uniforms.colour = float3(Utils.RandomFloat(min: 0.0, max: 1.0),
-		                                 Utils.RandomFloat(min: 0.0, max: 1.0),
-		                                 Utils.RandomFloat(min: 0.0, max: 1.0));
+		let p = Utils.RandomFloat(min: 0.0, max: 1.0)
+		var cumProb = 0.0 as Float
+		var selectedDesc = enemyDescs[0]
+		
+		for desc in enemyDescs
+		{
+			cumProb += desc.prob
+			if p < cumProb
+			{
+				selectedDesc = desc
+				break
+			}
+		}
+		
+		var world = float4x4.makeScale(selectedDesc.scale, selectedDesc.scale, selectedDesc.scale)
+		world[3] = translation
+		if (selectedDesc.fullRotate)
+		{
+			rotAxis = float3(0, ry, 0)
+		}
+		else
+		{
+			rotAxis = float3(rx, ry, rz)
+		}
+		
+		let meshInstance = MeshInstance(kernel: kernel, mesh: selectedDesc.mesh, world: world)
+		meshInstance.perMesh.colour = selectedDesc.colour
+		
+		super.init(meshInstance: meshInstance)
 	}
 	
 	override func update(_ dt: Float)
 	{
 		rads += dt
-		subMesh.uniforms.world = float4x4.makeScale(0.5, 0.5, 0.5)
-		subMesh.uniforms.world.rotate(rads, axis: rotAxis)
-		subMesh.uniforms.world[3] = translation
+		meshInstance.perMesh.world.rotate(dt, axis: rotAxis)
+		meshInstance.perMesh.world[3] = translation
 	}
 }

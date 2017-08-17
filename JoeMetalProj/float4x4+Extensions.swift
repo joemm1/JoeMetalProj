@@ -3,6 +3,15 @@ import Foundation
 import simd
 import GLKit
 
+extension float4
+{
+	var xyz: float3
+	{
+		get { return float3(self.x, self.y, self.z); }
+		set(val) { self.x = val.x; self.y = val.y; self.z = val.z; }
+	}
+}
+
 extension float4x4
 {
 	init()

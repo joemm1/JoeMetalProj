@@ -10,54 +10,74 @@ import Foundation
 import Metal
 import QuartzCore
 
-class MetalObjects
-{
-    let device :        MTLDevice
-    let commandQueue:   MTLCommandQueue
-    let drawable:       CAMetalDrawable
-    
-    init(device: MTLDevice, commandQueue: MTLCommandQueue, drawable: CAMetalDrawable)
-    {
-        self.device = device
-        self.commandQueue = commandQueue
-        self.drawable = drawable
-    }
-}
-
 class RenderPass
 {
-	func render(kernel: Kernel, clearColour: MTLClearColor, perPassUniforms: PerPassUniforms, subMeshes: [SubMesh])
+	var meshInstances =			[MeshInstance]()
+	var perPassUniforms:		PerPassUniforms
+	var perPassBuffers =		[Buffer]()
+	let renderPassDescriptor: 	MTLRenderPassDescriptor
+	let depthStencilState:		MTLDepthStencilState
+	
+	init(kernel: Kernel, clearColour: MTLClearColor)
+	{
+		self.perPassUniforms = PerPassUniforms(device: kernel.device)
+		
+		renderPassDescriptor = MTLRenderPassDescriptor()
+		renderPassDescriptor.colorAttachments[0].loadAction = .clear
+		renderPassDescriptor.colorAttachments[0].clearColor = clearColour
+		renderPassDescriptor.colorAttachments[0].storeAction = .store
+		renderPassDescriptor.depthAttachment.loadAction = .clear
+		renderPassDescriptor.depthAttachment.clearDepth = 1.0
+		
+		let depthDesc = MTLDepthStencilDescriptor()
+		depthDesc.isDepthWriteEnabled = true
+		depthDesc.depthCompareFunction = .less
+		depthStencilState = kernel.device.makeDepthStencilState(descriptor: depthDesc)!
+	}
+	
+	func frame()
+	{
+		meshInstances = [MeshInstance]()
+	}
+	
+	func doCulling(_ gameObjects: [GameObject])
+	{
+		for obj in gameObjects
+		{
+			//#todo culling
+			meshInstances.append(obj.meshInstance)
+		}
+	}
+	
+	func render(kernel: Kernel, depthTex: MTLTexture)
     {
 		let drawable = kernel.metalLayer.nextDrawable()!
 		
         //render pass
-        let renderPassDescriptor = MTLRenderPassDescriptor()
-        renderPassDescriptor.colorAttachments[0].texture = drawable.texture
-        renderPassDescriptor.colorAttachments[0].loadAction = .clear
-        renderPassDescriptor.colorAttachments[0].clearColor = clearColour
-        renderPassDescriptor.colorAttachments[0].storeAction = .store
+		renderPassDescriptor.colorAttachments[0].texture = drawable.texture
+		renderPassDescriptor.depthAttachment.texture = depthTex
         
         //cmd encoder
         let commandBuffer = kernel.commandQueue.makeCommandBuffer()!
         let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)!
 
         //per-pass uniforms
-        perPassUniforms.bind(device: kernel.device, renderEncoder: renderEncoder)
+        perPassUniforms.bind(renderEncoder: renderEncoder)
+		
+		//per-pass buffers
+		for buffer in perPassBuffers
+		{
+			buffer.bind(renderEncoder: renderEncoder)
+		}
         
         //pass state
         renderEncoder.setCullMode(MTLCullMode.front)
-		
-		
-		let depthDesc = MTLDepthStencilDescriptor()
-		depthDesc.isDepthWriteEnabled = true
-		depthDesc.depthCompareFunction = .less
-		let depthStencilState = kernel.device.makeDepthStencilState(descriptor: depthDesc)!
 		renderEncoder.setDepthStencilState(depthStencilState)
 
-        //iterate over submeshes
-        for subMesh in subMeshes
+        //iterate over meshes
+        for mi in meshInstances
         {
-			subMesh.render(kernel: kernel, renderEncoder: renderEncoder)
+			mi.render(kernel: kernel, renderEncoder: renderEncoder)
         }
         
         //end encoding

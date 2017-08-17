@@ -15,17 +15,20 @@ class App
 	let view:				UIView
 	let kernel:				Kernel
 	
-	var projectionMatrix:   float4x4
+	let mainPass: 			RenderPass
 	
 	var touchMgr =			TouchMgr()
 	
 	var gameObjects =		Array<GameObject>()
-	
 	var player =			Player()
-	
-	//let fighter:			Model
-	
 	let kNumEnemies =		250
+	
+	enum FunctionConstants: Int
+	{
+		case kDoesPicking
+		case kHasAlbedoMap
+		case kHasNormalMap
+	}
 	
 	init(view: UIView)
 	{
@@ -33,29 +36,74 @@ class App
 		
 		kernel = Kernel(view: view)
 		
-		projectionMatrix = float4x4.makePerspectiveViewAngle(Utils.ToRads(degs: 85.0), aspectRatio: Float(view.bounds.size.width / view.bounds.size.height), nearZ: 0.01, farZ: 100.0)
+		//shader set
+		let fnConstantValues = MTLFunctionConstantValues()
+		var doesPicking = false
+		fnConstantValues.setConstantValue(&doesPicking, type: .bool, index: FunctionConstants.kDoesPicking.rawValue)
+		var hasAlbedoMap = true
+		fnConstantValues.setConstantValue(&hasAlbedoMap, type: .bool, index: FunctionConstants.kHasAlbedoMap.rawValue)
+		var hasNormalMap = false
+		fnConstantValues.setConstantValue(&hasNormalMap, type: .bool, index: FunctionConstants.kHasNormalMap.rawValue)
+		let shaderSet = ShaderSet(kernel: kernel, vsName: "basic_vertex", fsName: "basic_fragment", fnConstantValues: fnConstantValues)
 		
-		let shaderSet = ShaderSet(kernel: kernel, vsName: "basic_vertex", fsName: "basic_fragment")
+		//enemies
+		let r2 = true
+		let xwing = false
+		let bb = false
+		let rocket = false
+		
+		var enemyDescs = Array<EnemyDesc>()
+		if xwing
+		{
+			let xDesc = ModelDesc(shaderSet: shaderSet, modelName: "Data/X-Fighter", modelExt: "obj", albedoMapName: "Data/XWing_Diffuse_01", albedoMapExt: "jpg")
+			let xModel = Model(kernel: kernel, modelDesc: xDesc)
+			enemyDescs.append(EnemyDesc(prob: 0.01, mesh: xModel, colour: float3(1.0, 1.0, 1.0), scale: 0.01, fullRotate: false))
+		}
+		if r2
+		{
+			let r2Desc = ModelDesc(shaderSet: shaderSet, modelName: "Data/R2-Unit", modelExt: "obj", albedoMapName: "Data/R2D2_Diffuse", albedoMapExt: "jpg")
+			let r2Model = Model(kernel: kernel, modelDesc: r2Desc)
+			enemyDescs.append(EnemyDesc(prob: 0.05, mesh: r2Model, colour: float3(1.0, 1.0, 1.0), scale: 0.01, fullRotate: false))
+		}
+		if bb
+		{
+			let bbDesc = ModelDesc(shaderSet: shaderSet, modelName: "Data/BB-Unit", modelExt: "obj", albedoMapName: "Data/Body_Diffuse", albedoMapExt: "jpg")
+			let bbModel = Model(kernel: kernel, modelDesc: bbDesc)
+			enemyDescs.append(EnemyDesc(prob: 0.01, mesh: bbModel, colour: float3(1.0, 1.0, 1.0), scale: 0.01, fullRotate: false))
+		}
+		if rocket
+		{
+			let rocketDesc = ModelDesc(shaderSet: shaderSet, modelName: "Data/retro_rocket", modelExt: "obj", albedoMapName: "Data/cube", albedoMapExt: "png")
+			let rocketModel = Model(kernel: kernel, modelDesc: rocketDesc)
+			enemyDescs.append(EnemyDesc(prob: 0.1, mesh: rocketModel, colour: float3(1.0, 1.0, 1.0), scale: 0.01, fullRotate: false))
+		}
+		let cube = Cube(kernel: kernel, shaderSet: shaderSet)
+		enemyDescs.append(EnemyDesc(prob: 1, mesh: cube, colour: Utils.RandomColour(), scale: 0.5, fullRotate: true))
 		
 		for _ in 0..<kNumEnemies
 		{
-			let obj = Enemy(kernel: kernel, shaderSet: shaderSet)
+			let obj = Enemy(kernel: kernel, enemyDescs: enemyDescs)
 			gameObjects.append(obj)
 		}
 		
-		//fighter = Model(kernel: kernel, shaderSet: shaderSet, world: float4x4(), name: "Data/X-Fighter", ext: "obj")
+		//main pass
+		mainPass = RenderPass(kernel: kernel, clearColour: MTLClearColor(red: 0.1, green: 0.1, blue: 0.1, alpha: 1.0))
 	}
 	
 	func updateSubViews()
 	{
 		kernel.updateSubViews(view: view)
 		
-		projectionMatrix = float4x4.makePerspectiveViewAngle(Utils.ToRads(degs: 85.0), aspectRatio: Float(view.bounds.size.width / view.bounds.size.height), nearZ: 0.01, farZ: 100.0)
+		mainPass.perPassUniforms.proj = float4x4.makePerspectiveViewAngle(Utils.ToRads(degs: 85.0), aspectRatio: Float(view.bounds.size.width / view.bounds.size.height), nearZ: 0.01, farZ: 100.0)
 	}
 	
 	func update(delta: CFTimeInterval)
 	{
-		let dt = Float(delta)
+		var dt = Float(delta)
+		if dt > 0.33
+		{
+			dt = 0.33
+		}
 		
 		player.update(dt, touchMgr: touchMgr)
 		for obj in gameObjects
@@ -68,18 +116,9 @@ class App
 	
 	func render()
 	{
-		var subMeshes = Array<SubMesh>()
-		for obj in gameObjects
-		{
-			subMeshes.append(obj.subMesh)
-		}
-		
-		//subMeshes.append(fighter)
-		
-		let clearColour = MTLClearColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1.0)
-		let perPassUniforms = PerPassUniforms(binding: 1, view: player.viewMatrix, proj: projectionMatrix)
-		
-		let renderPass = RenderPass()
-		renderPass.render(kernel: kernel, clearColour: clearColour, perPassUniforms: perPassUniforms, subMeshes: subMeshes)
+		mainPass.frame()
+		mainPass.perPassUniforms.view = player.viewMatrix
+		mainPass.doCulling(gameObjects)
+		mainPass.render(kernel: kernel, depthTex: kernel.depthTex!)
 	}
 }

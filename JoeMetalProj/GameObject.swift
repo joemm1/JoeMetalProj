@@ -10,11 +10,11 @@ import Foundation
 
 class GameObject
 {
-	var subMesh:		SubMesh
+	var meshInstance:		MeshInstance
 	
-	init(subMesh: SubMesh)
+	init(meshInstance: MeshInstance)
 	{
-		self.subMesh = subMesh
+		self.meshInstance = meshInstance
 	}
 	
 	func update(_ dt: Float) {}
