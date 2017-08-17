@@ -17,14 +17,16 @@ struct ModelDesc
 	let modelExt: 			String
 	let albedoMapName:		String
 	let albedoMapExt: 		String
+	let calcNormals:		Bool
 	
-	init(shaderSet: ShaderSet, modelName: String, modelExt: String, albedoMapName: String, albedoMapExt: String)
+	init(shaderSet: ShaderSet, modelName: String, modelExt: String, albedoMapName: String, albedoMapExt: String, calcNormals: Bool = true)
 	{
 		self.shaderSet = shaderSet
 		self.modelName = modelName
 		self.modelExt = modelExt
 		self.albedoMapName = albedoMapName
 		self.albedoMapExt = albedoMapExt
+		self.calcNormals = calcNormals
 	}
 }
 
@@ -67,7 +69,10 @@ class Model : Mesh
 			fatalError("Failed to get mesh \(modelDesc.modelName) from asset.")
 		}
 		
-		//mdlMesh.addNormals(withAttributeNamed: MDLVertexAttributeNormal, creaseThreshold: 0.0)
+		if modelDesc.calcNormals
+		{
+			mdlMesh.addNormals(withAttributeNamed: MDLVertexAttributeNormal, creaseThreshold: 0.0)
+		}
 		mtkMesh = try! MTKMesh(mesh: mdlMesh, device: kernel.device)
 		
 		let path = Bundle.main.path(forResource: modelDesc.albedoMapName, ofType: modelDesc.albedoMapExt)!

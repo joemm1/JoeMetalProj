@@ -25,8 +25,8 @@ class App
 	
 	let r2 = 				true
 	let xwing = 			false
-	let bb = 				true
-	let rocket = 			false
+	let bb = 				false
+	let rocket = 			true
 	
 	enum FunctionConstants: Int
 	{
@@ -73,7 +73,7 @@ class App
 		}
 		if rocket
 		{
-			let rocketDesc = ModelDesc(shaderSet: shaderSet, modelName: "Data/retro_rocket", modelExt: "obj", albedoMapName: "Data/cube", albedoMapExt: "png")
+			let rocketDesc = ModelDesc(shaderSet: shaderSet, modelName: "Data/retro_rocket", modelExt: "obj", albedoMapName: "Data/cube", albedoMapExt: "jpg", calcNormals: true)
 			let rocketModel = Model(kernel: kernel, modelDesc: rocketDesc)
 			enemyDescs.append(EnemyDesc(prob: 0.1, mesh: rocketModel, scale: 0.01, fullRotate: false, randomColour: false))
 		}
