@@ -16,15 +16,15 @@ struct EnemyDesc
 	let mesh:			Mesh
 	let scale:			Float
 	let fullRotate:		Bool
-	let colour:			float3
+	let randomColour:	Bool
 	
-	init(prob: Float, mesh: Mesh, colour: float3, scale: Float, fullRotate: Bool)
+	init(prob: Float, mesh: Mesh, scale: Float, fullRotate: Bool, randomColour: Bool)
 	{
 		self.prob = prob
 		self.mesh = mesh
 		self.scale = scale
 		self.fullRotate = fullRotate
-		self.colour = colour
+		self.randomColour = randomColour
 	}
 }
 
@@ -61,17 +61,13 @@ class Enemy : GameObject
 		
 		var world = float4x4.makeScale(selectedDesc.scale, selectedDesc.scale, selectedDesc.scale)
 		world[3] = translation
-		if (selectedDesc.fullRotate)
-		{
-			rotAxis = float3(0, ry, 0)
-		}
-		else
-		{
-			rotAxis = float3(rx, ry, rz)
-		}
+		rotAxis = (selectedDesc.fullRotate) ? float3(rx, ry, rz) : float3(0, ry, 0)
 		
 		let meshInstance = MeshInstance(kernel: kernel, mesh: selectedDesc.mesh, world: world)
-		meshInstance.perMesh.colour = selectedDesc.colour
+		if selectedDesc.randomColour
+		{
+			meshInstance.perMesh.colour = Utils.RandomColour()
+		}
 		
 		super.init(meshInstance: meshInstance)
 	}

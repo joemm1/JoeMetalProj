@@ -21,7 +21,12 @@ class App
 	
 	var gameObjects =		Array<GameObject>()
 	var player =			Player()
-	let kNumEnemies =		250
+	let kNumEnemies =		150
+	
+	let r2 = 				true
+	let xwing = 			false
+	let bb = 				true
+	let rocket = 			false
 	
 	enum FunctionConstants: Int
 	{
@@ -47,38 +52,34 @@ class App
 		let shaderSet = ShaderSet(kernel: kernel, vsName: "basic_vertex", fsName: "basic_fragment", fnConstantValues: fnConstantValues)
 		
 		//enemies
-		let r2 = true
-		let xwing = false
-		let bb = false
-		let rocket = false
-		
 		var enemyDescs = Array<EnemyDesc>()
 		if xwing
 		{
 			let xDesc = ModelDesc(shaderSet: shaderSet, modelName: "Data/X-Fighter", modelExt: "obj", albedoMapName: "Data/XWing_Diffuse_01", albedoMapExt: "jpg")
 			let xModel = Model(kernel: kernel, modelDesc: xDesc)
-			enemyDescs.append(EnemyDesc(prob: 0.01, mesh: xModel, colour: float3(1.0, 1.0, 1.0), scale: 0.01, fullRotate: false))
+			enemyDescs.append(EnemyDesc(prob: 0.01, mesh: xModel, scale: 0.01, fullRotate: false, randomColour: false))
 		}
 		if r2
 		{
 			let r2Desc = ModelDesc(shaderSet: shaderSet, modelName: "Data/R2-Unit", modelExt: "obj", albedoMapName: "Data/R2D2_Diffuse", albedoMapExt: "jpg")
 			let r2Model = Model(kernel: kernel, modelDesc: r2Desc)
-			enemyDescs.append(EnemyDesc(prob: 0.05, mesh: r2Model, colour: float3(1.0, 1.0, 1.0), scale: 0.01, fullRotate: false))
+			enemyDescs.append(EnemyDesc(prob: 0.05, mesh: r2Model, scale: 0.01, fullRotate: false, randomColour: false))
 		}
 		if bb
 		{
 			let bbDesc = ModelDesc(shaderSet: shaderSet, modelName: "Data/BB-Unit", modelExt: "obj", albedoMapName: "Data/Body_Diffuse", albedoMapExt: "jpg")
 			let bbModel = Model(kernel: kernel, modelDesc: bbDesc)
-			enemyDescs.append(EnemyDesc(prob: 0.01, mesh: bbModel, colour: float3(1.0, 1.0, 1.0), scale: 0.01, fullRotate: false))
+			enemyDescs.append(EnemyDesc(prob: 0.05, mesh: bbModel, scale: 0.01, fullRotate: false, randomColour: false))
 		}
 		if rocket
 		{
 			let rocketDesc = ModelDesc(shaderSet: shaderSet, modelName: "Data/retro_rocket", modelExt: "obj", albedoMapName: "Data/cube", albedoMapExt: "png")
 			let rocketModel = Model(kernel: kernel, modelDesc: rocketDesc)
-			enemyDescs.append(EnemyDesc(prob: 0.1, mesh: rocketModel, colour: float3(1.0, 1.0, 1.0), scale: 0.01, fullRotate: false))
+			enemyDescs.append(EnemyDesc(prob: 0.1, mesh: rocketModel, scale: 0.01, fullRotate: false, randomColour: false))
 		}
-		let cube = Cube(kernel: kernel, shaderSet: shaderSet)
-		enemyDescs.append(EnemyDesc(prob: 1, mesh: cube, colour: Utils.RandomColour(), scale: 0.5, fullRotate: true))
+		let cubeTex = Texture(kernel: kernel, path: "Data/cube", ext: "jpg")
+		let cube = Cube(kernel: kernel, shaderSet: shaderSet, texture: cubeTex)
+		enemyDescs.append(EnemyDesc(prob: 1, mesh: cube, scale: 0.5, fullRotate: true, randomColour: true))
 		
 		for _ in 0..<kNumEnemies
 		{

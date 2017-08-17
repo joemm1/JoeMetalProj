@@ -56,10 +56,10 @@ class PrimitiveMesh: Mesh
 
 class Cube: PrimitiveMesh
 {
-	let texture:			MTLTexture
+	let texture:			Texture
 	let sampler:			MTLSamplerState
 	
-	init(kernel: Kernel, shaderSet: ShaderSet)
+	init(kernel: Kernel, shaderSet: ShaderSet, texture: Texture)
 	{
 		//top
 		let top0 = Vertex(x: -1.0, y:   1.0, z:  -1.0, nx:  0.0, ny:  1.0, nz:  0.0, u:	0.0, v:	0.0)
@@ -106,12 +106,10 @@ class Cube: PrimitiveMesh
 			frn0, frn2, frn1, frn0, frn3, frn2
 		]
 		
-		let path = Bundle.main.path(forResource: "Data/cube", ofType: "jpg")!
-		let data = try! NSData(contentsOfFile: path) as Data
-		texture = try! kernel.textureLoader.newTexture(with: data, options: [MTKTextureLoader.Option.SRGB : (false as NSNumber)])
-		
 		let desc = MTLSamplerDescriptor()
 		sampler = kernel.device.makeSamplerState(descriptor: desc)!
+		
+		self.texture = texture
 		
 		super.init(kernel: kernel, shaderSet: shaderSet, vertices: verticesArray, name: "Cube")
 	}
@@ -119,7 +117,7 @@ class Cube: PrimitiveMesh
 	override func render(kernel: Kernel, renderEncoder: MTLRenderCommandEncoder)
 	{
 		renderEncoder.setFragmentSamplerState(sampler, index: 0)
-		renderEncoder.setFragmentTexture(texture, index: 0)
+		renderEncoder.setFragmentTexture(texture.mtlTex, index: 0)
 		
 		super.render(kernel: kernel, renderEncoder: renderEncoder)
 	}
