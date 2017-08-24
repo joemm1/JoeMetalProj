@@ -5,6 +5,11 @@ import GLKit
 
 extension float4
 {
+	init(_ f3: float3, _ f: Float)
+	{
+		self.init(f3.x, f3.y, f3.z, f)
+	}
+	
 	var xyz: float3
 	{
 		get { return float3(self.x, self.y, self.z); }

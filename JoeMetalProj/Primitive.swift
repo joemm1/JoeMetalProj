@@ -42,7 +42,24 @@ class PrimitiveMesh: Mesh
 		
 		self.vertexCount = vertices.count
 		
-		super.init(kernel: kernel, shaderSet: shaderSet, vertexDescriptor: nil, name: name)
+		let fmin = Float.leastNormalMagnitude
+		let fmax = Float.greatestFiniteMagnitude
+		
+		var aabbMin = float3(fmax, fmax, fmax)
+		var aabbMax = float3(fmin, fmin, fmin)
+		
+		for v in vertices
+		{
+			aabbMin.x = min(v.x, aabbMin.x)
+			aabbMin.y = min(v.y, aabbMin.y)
+			aabbMin.z = min(v.z, aabbMin.z)
+			
+			aabbMax.x = min(v.x, aabbMax.x)
+			aabbMax.y = min(v.y, aabbMax.y)
+			aabbMax.z = min(v.z, aabbMax.z)
+		}
+		
+		super.init(kernel: kernel, shaderSet: shaderSet, vertexDescriptor: nil, aabbMin: aabbMin, aabbMax: aabbMax, name: name)
 	}
 	
 	override func render(kernel: Kernel, renderEncoder: MTLRenderCommandEncoder)

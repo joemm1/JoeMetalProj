@@ -40,13 +40,13 @@ class Utils
 	}
 	
 	//MARK: culling
-	func NormalizePlaneEquation(_ plane: float4) -> float4
+	static func NormalizePlaneEquation(_ plane: float4) -> float4
 	{
 		let normalLength: Float = length(plane.xyz)
 		return plane * ( 1.0 / ( normalLength + 0.000001 ) )
 	}
 	
-	func ApplyMatrixToPlaneEquation(plane: float4, mat: float4x4) -> float4
+	static func ApplyMatrixToPlaneEquation(plane: float4, mat: float4x4) -> float4
 	{
 		let mInv = mat.inverse
 		let mInvTr = mInv.transpose
@@ -55,22 +55,26 @@ class Utils
 		return transformedPlaneEq;
 	}
 	
-	func ExtractFrustumPlanesFromMatrix(from mat: float4x4, to pPlanes: inout [float4])
+	static func ExtractFrustumPlanesFromMatrix(_ mat: float4x4) -> [float4]
 	{
-		pPlanes[0] = NormalizePlaneEquation( float4( mat[0][3] - mat[0][0], mat[1][3] - mat[1][0], mat[2][3] - mat[2][0], mat[3][3] - mat[3][0] ) ) // Right
-		pPlanes[1] = NormalizePlaneEquation( float4( mat[0][3] + mat[0][0], mat[1][3] + mat[1][0], mat[2][3] + mat[2][0], mat[3][3] + mat[3][0] ) ) // Left
-		pPlanes[2] = NormalizePlaneEquation( float4( mat[0][3] - mat[0][1], mat[1][3] - mat[1][1], mat[2][3] - mat[2][1], mat[3][3] - mat[3][1] ) ) // Top
-		pPlanes[3] = NormalizePlaneEquation( float4( mat[0][3] + mat[0][1], mat[1][3] + mat[1][1], mat[2][3] + mat[2][1], mat[3][3] + mat[3][1] ) ) // Bottom
-		pPlanes[4] = NormalizePlaneEquation( float4( mat[0][3] + mat[0][2], mat[1][3] + mat[1][2], mat[2][3] + mat[2][2], mat[3][3] + mat[3][2] ) ) // Near
-		pPlanes[5] = NormalizePlaneEquation( float4( mat[0][3] - mat[0][2], mat[1][3] - mat[1][2], mat[2][3] - mat[2][2], mat[3][3] - mat[3][2] ) ) // Far
+		var planes = [float4]()
+		
+		planes.append( NormalizePlaneEquation( float4( mat[0][3] - mat[0][0], mat[1][3] - mat[1][0], mat[2][3] - mat[2][0], mat[3][3] - mat[3][0] ) ) )// Right
+		planes.append( NormalizePlaneEquation( float4( mat[0][3] + mat[0][0], mat[1][3] + mat[1][0], mat[2][3] + mat[2][0], mat[3][3] + mat[3][0] ) ) ) // Left
+		planes.append( NormalizePlaneEquation( float4( mat[0][3] - mat[0][1], mat[1][3] - mat[1][1], mat[2][3] - mat[2][1], mat[3][3] - mat[3][1] ) ) ) // Top
+		planes.append( NormalizePlaneEquation( float4( mat[0][3] + mat[0][1], mat[1][3] + mat[1][1], mat[2][3] + mat[2][1], mat[3][3] + mat[3][1] ) ) ) // Bottom
+		planes.append( NormalizePlaneEquation( float4( mat[0][3] + mat[0][2], mat[1][3] + mat[1][2], mat[2][3] + mat[2][2], mat[3][3] + mat[3][2] ) ) ) // Near
+		planes.append( NormalizePlaneEquation( float4( mat[0][3] - mat[0][2], mat[1][3] - mat[1][2], mat[2][3] - mat[2][2], mat[3][3] - mat[3][2] ) ) ) // Far
+		
+		return planes;
 	}
 	
-	func TransformPlane(plane: float4, matrix: float4x4) -> float4
+	static func TransformPlane(plane: float4, matrix: float4x4) -> float4
 	{
 		return NormalizePlaneEquation( ApplyMatrixToPlaneEquation(plane: plane, mat: matrix) );
 	}
 	
-	func PlaneTestWorldAABB(cubeMin: float3, cubeMax: float3, numPlanes: Int, pPlanes: [float4]) -> Bool
+	static func PlaneTestWorldAABB(cubeMin: float3, cubeMax: float3, numPlanes: Int, pPlanes: [float4]) -> Bool
 	{
 		let aabbPoints: [float3] = [ cubeMin, cubeMax ]
 		
@@ -99,8 +103,29 @@ class Utils
 			}
 		}
 		
-		// could also count if all points passed all planes and return as an "all in" state, right now that doesn't matter
-		// but later on it would be useful to determine which user planes should be passed on to the shader
+		return true;
+	}
+	
+	static func DoesPointCloudIntersectAllHalfSpaces(_ points: [float4], planes: [float4]) -> Bool
+	{		
+		outer: for planeIndex in 0..<planes.count
+		{
+			let cullingPlane = planes[planeIndex]
+			
+			for point in points
+			{
+				if dot(point, cullingPlane) >= 0.0
+				{
+					//this point is inside this halfspace
+					// => this pointcloud intersects the halfspace
+					continue outer
+				}
+			}
+			
+			//if we got here then none of the points were inside this halfspace
+			return false
+		}
+		
 		return true;
 	}
 }

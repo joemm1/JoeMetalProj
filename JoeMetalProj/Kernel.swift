@@ -11,6 +11,8 @@ import Metal
 import MetalKit
 import UIKit
 
+var gKernel: Kernel? = nil
+
 class Kernel
 {
 	var device:             MTLDevice
@@ -20,6 +22,8 @@ class Kernel
 	let defaultLibrary:		MTLLibrary
 	let mtkBufAllocator: 	MTKMeshBufferAllocator
 	var depthTex:			MTLTexture?
+	var textLayer:			TextLayer
+	var frameCount = 		0
 
 	init(view: UIView)
 	{
@@ -29,12 +33,25 @@ class Kernel
 		metalLayer.device = device
 		metalLayer.pixelFormat = .bgra8Unorm
 		metalLayer.framebufferOnly = true
+		metalLayer.transform = CATransform3DMakeTranslation(0, 0, 0)
 		view.layer.addSublayer(metalLayer)
+		
+		textLayer = TextLayer()
+		textLayer.transform = CATransform3DMakeTranslation(0, 0, 10)
+		textLayer.setNeedsDisplay()
+		textLayer.frame = view.bounds
+		view.layer.addSublayer(textLayer)
 		
 		commandQueue = device.makeCommandQueue()!
 		defaultLibrary = device.makeDefaultLibrary()!
 		textureLoader = MTKTextureLoader(device: device)
 		mtkBufAllocator = MTKMeshBufferAllocator(device: device)
+		
+		if gKernel != nil
+		{
+			fatalError("Attempting to have two Kernel objects")
+		}
+		gKernel = self
 	}
 	
 	func updateSubViews(view: UIView)
@@ -48,6 +65,8 @@ class Kernel
 			metalLayer.frame = CGRect(x: 0, y: 0, width: layerSize.width, height: layerSize.height)
 			metalLayer.drawableSize = CGSize(width: layerSize.width * scale, height: layerSize.height * scale)
 			
+			textLayer.frame = view.bounds
+			
 			let depthTexDesc = MTLTextureDescriptor()
 			depthTexDesc.pixelFormat = .depth32Float
 			depthTexDesc.width = Int(metalLayer.drawableSize.width)
@@ -57,5 +76,11 @@ class Kernel
 			depthTexDesc.usage = .renderTarget
 			depthTex = device.makeTexture(descriptor: depthTexDesc)!
 		}
+	}
+	
+	func update()
+	{
+		frameCount += 1
+		textLayer.setNeedsDisplay()
 	}
 }

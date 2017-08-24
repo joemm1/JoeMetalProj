@@ -23,9 +23,20 @@ class MeshInstance
 		self.mesh = mesh
 	}
 	
-	func render(kernel: Kernel, renderEncoder: MTLRenderCommandEncoder)
+	func render(renderEncoder: MTLRenderCommandEncoder)
 	{
 		perMesh.bind(renderEncoder: renderEncoder)
-		mesh.render(kernel: kernel, renderEncoder: renderEncoder)
+		mesh.render(kernel: gKernel!, renderEncoder: renderEncoder)
+	}
+	
+	func DoesWorldAabbIntersectAllHalfSpaces(_ planes: [float4]) -> Bool
+	{
+		let points = mesh.getWorldAabbPoints(world: perMesh.world)
+		if points.count == 0
+		{
+			return true
+		}
+		
+		return Utils.DoesPointCloudIntersectAllHalfSpaces(points, planes: planes)
 	}
 };

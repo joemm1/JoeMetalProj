@@ -30,11 +30,69 @@ struct ModelDesc
 	}
 }
 
-class Model : Mesh
+class ModelBase : Mesh
 {
 	let mtkMesh: 			MTKMesh
-	let texture:			MTLTexture
+	let texture:			Texture
 	let sampler:			MTLSamplerState
+	
+	init(kernel: Kernel, mdlMesh: MDLMesh, shaderSet: ShaderSet, texture: Texture, name: String)
+	{
+		mtkMesh = try! MTKMesh(mesh: mdlMesh, device: kernel.device)
+		
+		self.texture = texture
+		
+		let samplerDesc = MTLSamplerDescriptor()
+		sampler = kernel.device.makeSamplerState(descriptor: samplerDesc)!
+		
+		let mn = mdlMesh.boundingBox.minBounds
+		let aabbMin = float3(mn.x, mn.y, mn.z)
+		let mx = mdlMesh.boundingBox.maxBounds
+		let aabbMax = float3(mx.x, mx.y, mx.z)
+		
+		#if DEBUG
+			print("Loaded Model \(name)")
+			
+			print("AABB: (\(mn.x), \(mn.y), \(mn.z)) --> (\(mx.x), \(mx.y), \(mx.z))")
+			
+			print("  Submeshes:")
+			var count = 0
+			var cumIndexCount = 0
+			for subMesh in mtkMesh.submeshes
+			{
+				let div = ((subMesh.indexType == .uint16) ? 2 : 4)
+				count += 1
+				let indexCount = subMesh.indexBuffer.length / div
+				print("    Submesh \(count) has name '\(subMesh.name)' and index count \(indexCount)")
+				cumIndexCount += subMesh.indexBuffer.length / div
+			}
+			print("  Total index count: \(cumIndexCount)")
+		#endif
+		
+		super.init(kernel: kernel, shaderSet: shaderSet, vertexDescriptor: nil, aabbMin: aabbMin, aabbMax: aabbMax, name: name)
+	}
+	
+	override func render(kernel: Kernel, renderEncoder: MTLRenderCommandEncoder)
+	{
+		super.render(kernel: kernel, renderEncoder: renderEncoder)
+		
+		for vb in mtkMesh.vertexBuffers
+		{
+			renderEncoder.setVertexBuffer(vb.buffer, offset: vb.offset, index: 0)
+		}
+		
+		renderEncoder.setFragmentSamplerState(sampler, index: 0)
+		renderEncoder.setFragmentTexture(texture.mtlTex, index: 0)
+		
+		for subMesh in mtkMesh.submeshes
+		{
+			renderEncoder.drawIndexedPrimitives(type: subMesh.primitiveType, indexCount: subMesh.indexCount, indexType: subMesh.indexType, indexBuffer: subMesh.indexBuffer.buffer, indexBufferOffset: subMesh.indexBuffer.offset, instanceCount: 1)
+		}
+	}
+}
+
+class Model : ModelBase
+{
 	let modelDesc:			ModelDesc
 	
 	init(kernel: Kernel, modelDesc: ModelDesc)
@@ -73,56 +131,12 @@ class Model : Mesh
 		{
 			mdlMesh.addNormals(withAttributeNamed: MDLVertexAttributeNormal, creaseThreshold: 0.0)
 		}
-		mtkMesh = try! MTKMesh(mesh: mdlMesh, device: kernel.device)
 		
-		let path = Bundle.main.path(forResource: modelDesc.albedoMapName, ofType: modelDesc.albedoMapExt)!
-		let data = try! NSData(contentsOfFile: path) as Data
-		texture = try! kernel.textureLoader.newTexture(with: data, options: [MTKTextureLoader.Option.SRGB : (false as NSNumber)])
-		
-		let samplerDesc = MTLSamplerDescriptor()
-		sampler = kernel.device.makeSamplerState(descriptor: samplerDesc)!
+		let texture = Texture(kernel: kernel, path: modelDesc.albedoMapName, ext: modelDesc.albedoMapExt)
 		
 		self.modelDesc = modelDesc
 		
-		#if DEBUG
-			print("Loaded Model \(modelDesc.modelName)\(modelDesc.modelExt)")
-			
-			let mn = mdlMesh.boundingBox.minBounds
-			let mx = mdlMesh.boundingBox.maxBounds
-			print("AABB: (\(mn.x), \(mn.y), \(mn.z)) --> (\(mx.x), \(mx.y), \(mx.z))")
-			
-			print("  Submeshes:")
-			var count = 0
-			var cumIndexCount = 0
-			for subMesh in mtkMesh.submeshes
-			{
-				let div = ((subMesh.indexType == .uint16) ? 2 : 4)
-				count += 1
-				let indexCount = subMesh.indexBuffer.length / div
-				print("    Submesh \(count) has name '\(subMesh.name)' and index count \(indexCount)")
-				cumIndexCount += subMesh.indexBuffer.length / div
-			}
-			print("  Total index count: \(cumIndexCount)")
-		#endif
-		
-		super.init(kernel: kernel, shaderSet: modelDesc.shaderSet, vertexDescriptor: nil, name: modelDesc.modelName)
-	}
-	
-	override func render(kernel: Kernel, renderEncoder: MTLRenderCommandEncoder)
-	{
-		super.render(kernel: kernel, renderEncoder: renderEncoder)
-		
-		for vb in mtkMesh.vertexBuffers
-		{
-			renderEncoder.setVertexBuffer(vb.buffer, offset: vb.offset, index: 0)
-		}
-		
-		renderEncoder.setFragmentSamplerState(sampler, index: 0)
-		renderEncoder.setFragmentTexture(texture, index: 0)
-		
-		for subMesh in mtkMesh.submeshes
-		{
-			renderEncoder.drawIndexedPrimitives(type: subMesh.primitiveType, indexCount: subMesh.indexCount, indexType: subMesh.indexType, indexBuffer: subMesh.indexBuffer.buffer, indexBufferOffset: subMesh.indexBuffer.offset, instanceCount: 1)
-		}
+		super.init(kernel: kernel, mdlMesh: mdlMesh, shaderSet: modelDesc.shaderSet, texture: texture, name: modelDesc.modelName)
 	}
 }
+
