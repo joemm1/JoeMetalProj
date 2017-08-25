@@ -17,6 +17,8 @@ class Kernel
 {
 	var device:             MTLDevice
 	var metalLayer:         CAMetalLayer
+	//let metalGpuHeap:		MTLHeap
+	//let metalSharedHeap:	MTLHeap
 	var commandQueue:       MTLCommandQueue
 	let textureLoader:		MTKTextureLoader
 	let defaultLibrary:		MTLLibrary
@@ -24,6 +26,9 @@ class Kernel
 	var depthTex:			MTLTexture?
 	var textLayer:			TextLayer
 	var frameCount = 		0
+	
+	let kGpuHeapSize = 		20<<20
+	let kSharedHeapSize =	1<<20
 
 	init(view: UIView)
 	{
@@ -35,6 +40,18 @@ class Kernel
 		metalLayer.framebufferOnly = true
 		metalLayer.transform = CATransform3DMakeTranslation(0, 0, 0)
 		view.layer.addSublayer(metalLayer)
+		
+		/*
+		let gpuHeapDesc = MTLHeapDescriptor()
+		gpuHeapDesc.size = kGpuHeapSize
+		gpuHeapDesc.storageMode = .private
+		metalGpuHeap = device.makeHeap(descriptor: gpuHeapDesc)!
+		
+		let sharedHeapDesc = MTLHeapDescriptor()
+		sharedHeapDesc.size = kSharedHeapSize
+		sharedHeapDesc.storageMode = .shared
+		metalSharedHeap = device.makeHeap(descriptor: sharedHeapDesc)!
+		*/
 		
 		textLayer = TextLayer()
 		textLayer.transform = CATransform3DMakeTranslation(0, 0, 10)

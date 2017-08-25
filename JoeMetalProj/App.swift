@@ -27,7 +27,7 @@ class App
 	let r2 = 				true
 	let xwing = 			false
 	let bb = 				false
-	let rocket = 			true
+	let rocket = 			false
 	
 	enum FunctionConstants: Int
 	{

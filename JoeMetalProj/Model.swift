@@ -19,7 +19,7 @@ struct ModelDesc
 	let albedoMapExt: 		String
 	let calcNormals:		Bool
 	
-	init(shaderSet: ShaderSet, modelName: String, modelExt: String, albedoMapName: String, albedoMapExt: String, calcNormals: Bool = true)
+	init(shaderSet: ShaderSet, modelName: String, modelExt: String, albedoMapName: String, albedoMapExt: String, calcNormals: Bool = false)
 	{
 		self.shaderSet = shaderSet
 		self.modelName = modelName
@@ -127,9 +127,14 @@ class Model : ModelBase
 			fatalError("Failed to get mesh \(modelDesc.modelName) from asset.")
 		}
 		
+		//if mdlMesh.vertexAttributeData(forAttributeNamed: MDLVertexAttributeNormal) == nil
 		if modelDesc.calcNormals
 		{
+			let start = Date()
+			
 			mdlMesh.addNormals(withAttributeNamed: MDLVertexAttributeNormal, creaseThreshold: 0.0)
+			
+			print(String(format: "CalcNormals for \(modelDesc.modelName): %.1f s", (Date().timeIntervalSince1970 - start.timeIntervalSince1970)))
 		}
 		
 		let texture = Texture(kernel: kernel, path: modelDesc.albedoMapName, ext: modelDesc.albedoMapExt)

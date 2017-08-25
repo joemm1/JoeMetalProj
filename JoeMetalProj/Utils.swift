@@ -11,6 +11,19 @@ import simd
 
 class Utils
 {
+	static let kSeedRand 			= true
+	
+	//MARK: private
+	private static var firstTime = true
+	private static func SeedRand()
+	{
+		if firstTime && kSeedRand
+		{
+			firstTime = false
+			srand48(Int(Date().timeIntervalSince1970))
+		}
+	}
+	
 	//MARK: helpers
 	static func ToRads(degs: Float) -> Float
 	{
@@ -20,15 +33,19 @@ class Utils
 	//MARK: random
 	static func RandomInt(min: Int, max: Int) -> Int
 	{
-		let randInt = min + Int(arc4random_uniform(UInt32(max - min)))
+		SeedRand()
+		
+		let r = Int(drand48() * Double(max - min))
+		let randInt = min + Int(r)
 		return randInt
 	}
 	
 	static func RandomFloat(min: Float, max: Float) -> Float
 	{
-		let randInt = RandomInt(min: (Int)(min * 1000.0), max: (Int)(max * 1000.0))
-		let randFloat = (Float)(randInt) / 1000.0
-		return randFloat
+		SeedRand()
+		
+		let r = min + Float(drand48() * Double(max - min))
+		return r
 	}
 	
 	static func RandomColour() -> float3
