@@ -13,23 +13,22 @@ import MetalKit
 class Mesh
 {
 	let name:               String
-	let shaderSet:			ShaderSet
 	let pipelineState:      MTLRenderPipelineState
 	let aabbMin:			float3
 	let aabbMax:			float3
+	let material:			Material
 	
-	init(kernel: Kernel, shaderSet: ShaderSet, vertexDescriptor: MTLVertexDescriptor?, aabbMin: float3, aabbMax: float3, name: String)
+	init(material: Material, aabbMin: float3, aabbMax: float3, name: String)
 	{
-		self.shaderSet = shaderSet
+		self.material = material
 		
 		let pipelineStateDescriptor = MTLRenderPipelineDescriptor()
-		pipelineStateDescriptor.vertexFunction = shaderSet.vertexProgram
-		pipelineStateDescriptor.fragmentFunction = shaderSet.fragmentProgram
+		pipelineStateDescriptor.vertexFunction = material.shaderSet!.vertexProgram
+		pipelineStateDescriptor.fragmentFunction = material.shaderSet!.fragmentProgram
 		pipelineStateDescriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
 		pipelineStateDescriptor.depthAttachmentPixelFormat = .depth32Float
-		pipelineStateDescriptor.vertexDescriptor = vertexDescriptor
 		
-		self.pipelineState = try! kernel.device.makeRenderPipelineState(descriptor: pipelineStateDescriptor)
+		self.pipelineState = try! gKernel!.device.makeRenderPipelineState(descriptor: pipelineStateDescriptor)
 		
 		self.aabbMin = aabbMin
 		self.aabbMax = aabbMax
@@ -37,8 +36,12 @@ class Mesh
 		self.name = name
 	}
 	
-	func render(kernel: Kernel, renderEncoder: MTLRenderCommandEncoder)
+	func render(renderEncoder: MTLRenderCommandEncoder, overrideMaterial: Material?)
 	{
+		let mat = (overrideMaterial != nil) ? overrideMaterial!: material
+
+		mat.bind(renderEncoder: renderEncoder)
+
 		renderEncoder.setRenderPipelineState(pipelineState)
 	}
 	

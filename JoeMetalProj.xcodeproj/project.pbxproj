@@ -29,6 +29,8 @@
 		D89E33F61F1FCF650006F5A3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D89E33EB1F1FCF650006F5A3 /* AppDelegate.swift */; };
 		D89E33FB1F1FCF650006F5A3 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = D89E33F21F1FCF650006F5A3 /* Shaders.metal */; };
 		D8BB06AC1F465602004F4A48 /* Data in Resources */ = {isa = PBXBuildFile; fileRef = D8BB06AB1F4655B0004F4A48 /* Data */; };
+		D8F143A91F54C16F0022041B /* PbmShader.metal in Sources */ = {isa = PBXBuildFile; fileRef = D8F143A81F54C16F0022041B /* PbmShader.metal */; };
+		D8F143AC1F5734DA0022041B /* Material.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8F143AB1F5734DA0022041B /* Material.swift */; };
 		D8FD394B1F223AF3003A548B /* RenderPass.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8FD394A1F223AF3003A548B /* RenderPass.swift */; };
 		D8FD39531F224564003A548B /* Uniforms.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8FD39521F224564003A548B /* Uniforms.swift */; };
 		D8FD39591F23E8EB003A548B /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8FD39581F23E8EB003A548B /* App.swift */; };
@@ -87,6 +89,8 @@
 		D89E33EE1F1FCF650006F5A3 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D89E33F21F1FCF650006F5A3 /* Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		D8BB06AB1F4655B0004F4A48 /* Data */ = {isa = PBXFileReference; lastKnownFileType = text; name = Data; path = JoeMetalProj/Data; sourceTree = SOURCE_ROOT; };
+		D8F143A81F54C16F0022041B /* PbmShader.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = PbmShader.metal; sourceTree = "<group>"; };
+		D8F143AB1F5734DA0022041B /* Material.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Material.swift; sourceTree = "<group>"; };
 		D8FD394A1F223AF3003A548B /* RenderPass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RenderPass.swift; sourceTree = "<group>"; };
 		D8FD39521F224564003A548B /* Uniforms.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Uniforms.swift; sourceTree = "<group>"; };
 		D8FD39581F23E8EB003A548B /* App.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
@@ -122,15 +126,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		D81213F41F4583BE00327F31 /* Buffer */ = {
-			isa = PBXGroup;
-			children = (
-				D8FD39521F224564003A548B /* Uniforms.swift */,
-				D856494B1F3CDF4900D069FD /* Buffer.swift */,
-			);
-			name = Buffer;
-			sourceTree = "<group>";
-		};
 		D81213FB1F464C2A00327F31 /* Code */ = {
 			isa = PBXGroup;
 			children = (
@@ -143,15 +138,17 @@
 			name = Code;
 			sourceTree = "<group>";
 		};
-		D85F97C41F44334F00FB7BDE /* Mesh */ = {
+		D85F97C41F44334F00FB7BDE /* HighLevel */ = {
 			isa = PBXGroup;
 			children = (
-				D85F97C01F436B2700FB7BDE /* Mesh.swift */,
+				D8FD394A1F223AF3003A548B /* RenderPass.swift */,
+				D8FD39521F224564003A548B /* Uniforms.swift */,
 				D85F97C21F436B6200FB7BDE /* Primitive.swift */,
 				D87C494B1F32449E0071EF45 /* Model.swift */,
-				D81213F21F4581E600327F31 /* MeshInstance.swift */,
+				D84438991F4B7C760090AC18 /* TextLayer.swift */,
+				D87C49491F31BF1C0071EF45 /* Particle.swift */,
 			);
-			name = Mesh;
+			name = HighLevel;
 			sourceTree = "<group>";
 		};
 		D89E33B01F1FCF030006F5A3 = {
@@ -210,6 +207,20 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
+		D8F143AA1F5734720022041B /* LowLevel */ = {
+			isa = PBXGroup;
+			children = (
+				D8FD395F1F23EE11003A548B /* Kernel.swift */,
+				D856494B1F3CDF4900D069FD /* Buffer.swift */,
+				D87C49451F30F59D0071EF45 /* Shader.swift */,
+				D81214041F464F2800327F31 /* Texture.swift */,
+				D8F143AB1F5734DA0022041B /* Material.swift */,
+				D85F97C01F436B2700FB7BDE /* Mesh.swift */,
+				D81213F21F4581E600327F31 /* MeshInstance.swift */,
+			);
+			name = LowLevel;
+			sourceTree = "<group>";
+		};
 		D8FD39541F224694003A548B /* Engine */ = {
 			isa = PBXGroup;
 			children = (
@@ -224,14 +235,8 @@
 		D8FD39551F22469C003A548B /* Renderer */ = {
 			isa = PBXGroup;
 			children = (
-				D81213F41F4583BE00327F31 /* Buffer */,
-				D85F97C41F44334F00FB7BDE /* Mesh */,
-				D8FD395F1F23EE11003A548B /* Kernel.swift */,
-				D8FD394A1F223AF3003A548B /* RenderPass.swift */,
-				D87C49451F30F59D0071EF45 /* Shader.swift */,
-				D81214041F464F2800327F31 /* Texture.swift */,
-				D84438991F4B7C760090AC18 /* TextLayer.swift */,
-				D87C49491F31BF1C0071EF45 /* Particle.swift */,
+				D8F143AA1F5734720022041B /* LowLevel */,
+				D85F97C41F44334F00FB7BDE /* HighLevel */,
 			);
 			name = Renderer;
 			sourceTree = "<group>";
@@ -242,6 +247,7 @@
 				D89E33F21F1FCF650006F5A3 /* Shaders.metal */,
 				D87C49441F30F3770071EF45 /* ShadersArgBuf.metal */,
 				D87C49471F31BC630071EF45 /* Physics.metal */,
+				D8F143A81F54C16F0022041B /* PbmShader.metal */,
 			);
 			name = Shaders;
 			sourceTree = "<group>";
@@ -427,6 +433,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D8F143AC1F5734DA0022041B /* Material.swift in Sources */,
+				D8F143A91F54C16F0022041B /* PbmShader.metal in Sources */,
 				D81213F31F4581E600327F31 /* MeshInstance.swift in Sources */,
 				D8FD39601F23EE11003A548B /* Kernel.swift in Sources */,
 				D84438981F4B52FE0090AC18 /* ModelAsteroid.swift in Sources */,
@@ -624,6 +632,7 @@
 				DEVELOPMENT_TEAM = 437W2955TM;
 				INFOPLIST_FILE = JoeMetalProj/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MTL_COMPILER_FLAGS = "-Wno-missing-prototypes";
 				PRODUCT_BUNDLE_IDENTIFIER = JMM.JoeMetalProj;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "JoeMetalProj/JoeMetalProj-Bridging-Header.h";
@@ -641,6 +650,7 @@
 				DEVELOPMENT_TEAM = 437W2955TM;
 				INFOPLIST_FILE = JoeMetalProj/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MTL_COMPILER_FLAGS = "-Wno-missing-prototypes";
 				PRODUCT_BUNDLE_IDENTIFIER = JMM.JoeMetalProj;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "JoeMetalProj/JoeMetalProj-Bridging-Header.h";

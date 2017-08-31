@@ -62,12 +62,14 @@ class Enemy : GameObject
 		var world = float4x4.makeScale(selectedDesc.scale, selectedDesc.scale, selectedDesc.scale)
 		world[3] = translation
 		rotAxis = (selectedDesc.fullRotate) ? float3(rx, ry, rz) : float3(0, ry, 0)
-		
-		let meshInstance = MeshInstance(kernel: kernel, mesh: selectedDesc.mesh, world: world)
+
+		let material = Material()
 		if selectedDesc.randomColour
 		{
-			meshInstance.perMesh.colour = Utils.RandomColour()
+			material.uniforms.baseColour = Utils.RandomColour()
 		}
+
+		let meshInstance = MeshInstance(kernel: kernel, mesh: selectedDesc.mesh, world: world, overrideMaterial: material)
 		
 		super.init(meshInstance: meshInstance)
 	}

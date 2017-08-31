@@ -19,7 +19,7 @@ struct Vertex
 	
 	func floatBuffer() -> [Float]
 	{
-		return [x, y, z, nx, ny, nz, u, v]
+		return [x, y, z, u, v, nx, ny, nz, 0, 0, 0, 0, 0, 0]
 	}
 	
 }
@@ -29,7 +29,7 @@ class PrimitiveMesh: Mesh
 	let vertexCount:        Int
 	let vertexBuffer:       MTLBuffer
 	
-	init(kernel: Kernel, shaderSet: ShaderSet, vertices: Array<Vertex>, name: String)
+	init(material: Material, vertices: Array<Vertex>, name: String)
 	{
 		var vertexData = Array<Float>()
 		for vertex in vertices
@@ -38,7 +38,7 @@ class PrimitiveMesh: Mesh
 		}
 		
 		let dataSize = vertexData.count * MemoryLayout.size(ofValue: vertexData[0])
-		vertexBuffer = kernel.device.makeBuffer(bytes: vertexData, length: dataSize, options: [])!
+		vertexBuffer = gKernel!.device.makeBuffer(bytes: vertexData, length: dataSize, options: [])!
 		
 		self.vertexCount = vertices.count
 		
@@ -59,12 +59,12 @@ class PrimitiveMesh: Mesh
 			aabbMax.z = min(v.z, aabbMax.z)
 		}
 		
-		super.init(kernel: kernel, shaderSet: shaderSet, vertexDescriptor: nil, aabbMin: aabbMin, aabbMax: aabbMax, name: name)
+		super.init(material: material, aabbMin: aabbMin, aabbMax: aabbMax, name: name)
 	}
 	
-	override func render(kernel: Kernel, renderEncoder: MTLRenderCommandEncoder)
+	override func render(renderEncoder: MTLRenderCommandEncoder, overrideMaterial: Material?)
 	{
-		super.render(kernel: kernel, renderEncoder: renderEncoder)
+		super.render(renderEncoder: renderEncoder, overrideMaterial: overrideMaterial)
 		
 		renderEncoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
 		renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertexCount, instanceCount: 1)
@@ -73,10 +73,7 @@ class PrimitiveMesh: Mesh
 
 class Cube: PrimitiveMesh
 {
-	let texture:			Texture
-	let sampler:			MTLSamplerState
-	
-	init(kernel: Kernel, shaderSet: ShaderSet, texture: Texture)
+	init(kernel: Kernel, shaderDict: ShaderDict, texture: Texture)
 	{
 		//top
 		let top0 = Vertex(x: -1.0, y:   1.0, z:  -1.0, nx:  0.0, ny:  1.0, nz:  0.0, u:	0.0, v:	0.0)
@@ -122,21 +119,11 @@ class Cube: PrimitiveMesh
 			bck0, bck2, bck1, bck0, bck3, bck2,
 			frn0, frn2, frn1, frn0, frn3, frn2
 		]
+
+		let material = Material()
+		material.maps[TextureInputTypes.kBaseColour.rawValue] = texture
 		
-		let desc = MTLSamplerDescriptor()
-		sampler = kernel.device.makeSamplerState(descriptor: desc)!
-		
-		self.texture = texture
-		
-		super.init(kernel: kernel, shaderSet: shaderSet, vertices: verticesArray, name: "Cube")
-	}
-	
-	override func render(kernel: Kernel, renderEncoder: MTLRenderCommandEncoder)
-	{
-		renderEncoder.setFragmentSamplerState(sampler, index: 0)
-		renderEncoder.setFragmentTexture(texture.mtlTex, index: 0)
-		
-		super.render(kernel: kernel, renderEncoder: renderEncoder)
+		super.init(material: material, vertices: verticesArray, name: "Cube")
 	}
 }
 

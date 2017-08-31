@@ -14,10 +14,29 @@ class Texture
 {
 	let mtlTex:				MTLTexture
 	
-	init(kernel: Kernel, path: String, ext: String)
+	init(path: String, ext: String)
 	{
+		let options = [
+			MTKTextureLoader.Option.SRGB: false,
+			MTKTextureLoader.Option.textureStorageMode: MTLStorageMode.private,
+			MTKTextureLoader.Option.textureCPUCacheMode: MTLTextureUsage.shaderRead
+			] as [MTKTextureLoader.Option : Any]
+
 		let path = Bundle.main.path(forResource: path, ofType: ext)!
 		let data = try! NSData(contentsOfFile: path) as Data
-		mtlTex = try! kernel.textureLoader.newTexture(with: data, options: [MTKTextureLoader.Option.SRGB : (false as NSNumber)])
+		mtlTex = try! gKernel!.textureLoader.newTexture(with: data, options: options)
+	}
+
+	init(url: URL)
+	{
+		let options = [
+			MTKTextureLoader.Option.SRGB: false,
+			MTKTextureLoader.Option.textureStorageMode: MTLStorageMode.private,
+			MTKTextureLoader.Option.textureCPUCacheMode: MTLTextureUsage.shaderRead
+			] as [MTKTextureLoader.Option : Any]
+
+		let path = Bundle.main.path(forResource: url.deletingPathExtension().absoluteString, ofType: url.pathExtension)!
+		let data = try! NSData(contentsOfFile: path) as Data
+		mtlTex = try! gKernel!.textureLoader.newTexture(with: data, options: options)
 	}
 }

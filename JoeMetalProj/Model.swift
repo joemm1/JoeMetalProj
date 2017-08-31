@@ -15,19 +15,7 @@ struct ModelDesc
 	let shaderSet: 			ShaderSet
 	let modelName: 			String
 	let modelExt: 			String
-	let albedoMapName:		String
-	let albedoMapExt: 		String
 	let calcNormals:		Bool
-	
-	init(shaderSet: ShaderSet, modelName: String, modelExt: String, albedoMapName: String, albedoMapExt: String, calcNormals: Bool = false)
-	{
-		self.shaderSet = shaderSet
-		self.modelName = modelName
-		self.modelExt = modelExt
-		self.albedoMapName = albedoMapName
-		self.albedoMapExt = albedoMapExt
-		self.calcNormals = calcNormals
-	}
 }
 
 class ModelBase : Mesh
@@ -49,6 +37,14 @@ class ModelBase : Mesh
 		let aabbMin = float3(mn.x, mn.y, mn.z)
 		let mx = mdlMesh.boundingBox.maxBounds
 		let aabbMax = float3(mx.x, mx.y, mx.z)
+
+		let material = Material()
+		for sm in 0..<mdlMesh.submeshes!.count
+		{
+			let submesh = mdlMesh.submeshes![sm] as! MDLSubmesh
+
+			ModelBase.setUpMaterialProperty(mdlMaterial: submesh.material!, semantic: MDLMaterialSemantic.baseColor, texture: &material.maps[TextureInputTypes.kBaseColour.rawValue], uniform: &material.uniforms.baseColour)
+		}
 		
 		#if DEBUG
 			print("Loaded Model \(name)")
@@ -69,18 +65,45 @@ class ModelBase : Mesh
 			print("  Total index count: \(cumIndexCount)")
 		#endif
 		
-		super.init(kernel: kernel, shaderSet: shaderSet, vertexDescriptor: nil, aabbMin: aabbMin, aabbMax: aabbMax, name: name)
+		super.init(material: material, aabbMin: aabbMin, aabbMax: aabbMax, name: name)
+	}
+
+	static func setUpMaterialProperty(mdlMaterial: MDLMaterial,
+	                           semantic: MDLMaterialSemantic,
+	                           texture: inout Texture?,
+	                           uniform: UnsafeMutableRawPointer)
+	{
+		let property = mdlMaterial.property(with: semantic)
+		if property != nil
+		{
+			let prop = property!
+			if prop.type == MDLMaterialPropertyType.string
+			{
+				texture = Texture(url: URL(string: prop.stringValue!)!)
+			}
+			else if prop.type == MDLMaterialPropertyType.float
+			{
+				memcpy(uniform, &prop.floatValue, MemoryLayout<Float>.stride)
+			}
+			else if prop.type == MDLMaterialPropertyType.float3
+			{
+				memcpy(uniform, &prop.float3Value, MemoryLayout<Float>.stride * 3)
+			}
+		}
 	}
 	
-	override func render(kernel: Kernel, renderEncoder: MTLRenderCommandEncoder)
+	override func render(renderEncoder: MTLRenderCommandEncoder, overrideMaterial: Material?)
 	{
-		super.render(kernel: kernel, renderEncoder: renderEncoder)
-		
-		for vb in mtkMesh.vertexBuffers
+		super.render(renderEncoder: renderEncoder, overrideMaterial: overrideMaterial)
+
+		if mtkMesh.vertexBuffers.count > 1
 		{
-			renderEncoder.setVertexBuffer(vb.buffer, offset: vb.offset, index: 0)
+			print("Mesh has >1 buffer => ignoring")
 		}
-		
+
+		let vb = mtkMesh.vertexBuffers[0]
+		renderEncoder.setVertexBuffer(vb.buffer, offset: vb.offset, index: 0)
+
 		renderEncoder.setFragmentSamplerState(sampler, index: 0)
 		renderEncoder.setFragmentTexture(texture.mtlTex, index: 0)
 		
@@ -95,7 +118,7 @@ class Model : ModelBase
 {
 	let modelDesc:			ModelDesc
 	
-	init(kernel: Kernel, modelDesc: ModelDesc)
+	init(kernel: Kernel, modelDesc: ModelDesc, texture: Texture)
 	{
 		guard let url = Bundle.main.url(forResource: modelDesc.modelName, withExtension: modelDesc.modelExt)
 			else
@@ -109,25 +132,34 @@ class Model : ModelBase
 		attribute.format = MDLVertexFormat.float3
 		attribute.offset = 0
 		attribute = desc.attributes[1] as! MDLVertexAttribute
-		attribute.name = MDLVertexAttributeNormal
-		attribute.format = MDLVertexFormat.float3
-		attribute.offset = 12
-		attribute = desc.attributes[2] as! MDLVertexAttribute
 		attribute.name = MDLVertexAttributeTextureCoordinate
 		attribute.format = MDLVertexFormat.float2
-		attribute.offset = 24
+		attribute.offset = 12
+		attribute = desc.attributes[2] as! MDLVertexAttribute
+		attribute.name = MDLVertexAttributeNormal
+		attribute.format = MDLVertexFormat.float3
+		attribute.offset = 20
+		attribute = desc.attributes[3] as! MDLVertexAttribute
+		attribute.name = MDLVertexAttributeTangent
+		attribute.format = MDLVertexFormat.float3
+		attribute.offset = 32
+		attribute = desc.attributes[4] as! MDLVertexAttribute
+		attribute.name = MDLVertexAttributeBitangent
+		attribute.format = MDLVertexFormat.float3
+		attribute.offset = 44
 		
 		let layout = desc.layouts[0] as! MDLVertexBufferLayout
-		layout.stride = 32
+		layout.stride = 56
 		
 		let asset = MDLAsset(url:url, vertexDescriptor: desc, bufferAllocator: kernel.mtkBufAllocator)
+
+		//#todo: iterate over MDLMesh objects in MDLAsset
 		guard let mdlMesh = asset.object(at: 0) as? MDLMesh
 			else
 		{
 			fatalError("Failed to get mesh \(modelDesc.modelName) from asset.")
 		}
 		
-		//if mdlMesh.vertexAttributeData(forAttributeNamed: MDLVertexAttributeNormal) == nil
 		if modelDesc.calcNormals
 		{
 			let start = Date()
@@ -136,8 +168,6 @@ class Model : ModelBase
 			
 			print(String(format: "CalcNormals for \(modelDesc.modelName): %.1f s", (Date().timeIntervalSince1970 - start.timeIntervalSince1970)))
 		}
-		
-		let texture = Texture(kernel: kernel, path: modelDesc.albedoMapName, ext: modelDesc.albedoMapExt)
 		
 		self.modelDesc = modelDesc
 		
