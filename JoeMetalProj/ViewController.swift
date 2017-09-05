@@ -50,9 +50,9 @@ class ViewController: UIViewController
 		
 		//print to screen
 		let strGpu = String(format: "GPU: %.1f ms", app.mainPass.lastFrameGpuTime * 1000.0)
-		gKernel!.textLayer.addEntry(TextEntry(strGpu))
+		gKernel.textLayer.addEntry(TextEntry(strGpu))
 		let strCpu = String(format: "CPU: %.1f ms", (app.mainPass.timeAtPresent.timeIntervalSince1970 - start.timeIntervalSince1970) * 1000.0)
-		gKernel!.textLayer.addEntry(TextEntry(strCpu))
+		gKernel.textLayer.addEntry(TextEntry(strCpu))
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?)

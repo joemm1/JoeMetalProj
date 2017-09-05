@@ -13,36 +13,25 @@ import MetalKit
 class Mesh
 {
 	let name:               String
-	let pipelineState:      MTLRenderPipelineState
 	let aabbMin:			float3
 	let aabbMax:			float3
-	let material:			Material
+	var subMeshes:			[SubMesh]
 	
-	init(material: Material, aabbMin: float3, aabbMax: float3, name: String)
+	init(subMeshes: [SubMesh], aabbMin: float3, aabbMax: float3, name: String)
 	{
-		self.material = material
-		
-		let pipelineStateDescriptor = MTLRenderPipelineDescriptor()
-		pipelineStateDescriptor.vertexFunction = material.shaderSet!.vertexProgram
-		pipelineStateDescriptor.fragmentFunction = material.shaderSet!.fragmentProgram
-		pipelineStateDescriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
-		pipelineStateDescriptor.depthAttachmentPixelFormat = .depth32Float
-		
-		self.pipelineState = try! gKernel!.device.makeRenderPipelineState(descriptor: pipelineStateDescriptor)
-		
+		self.subMeshes = subMeshes
 		self.aabbMin = aabbMin
 		self.aabbMax = aabbMax
 		
 		self.name = name
 	}
 	
-	func render(renderEncoder: MTLRenderCommandEncoder, overrideMaterial: Material?)
+	func render(renderEncoder: MTLRenderCommandEncoder, materialOverride: Material?)
 	{
-		let mat = (overrideMaterial != nil) ? overrideMaterial!: material
-
-		mat.bind(renderEncoder: renderEncoder)
-
-		renderEncoder.setRenderPipelineState(pipelineState)
+		for sm in subMeshes
+		{
+			sm.render(renderEncoder: renderEncoder, materialOverride: materialOverride)
+		}
 	}
 	
 	func getWorldAabbPoints(world: float4x4) -> [float4]

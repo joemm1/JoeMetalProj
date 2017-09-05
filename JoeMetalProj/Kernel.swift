@@ -11,7 +11,7 @@ import Metal
 import MetalKit
 import UIKit
 
-var gKernel: Kernel? = nil
+var gKernel: Kernel!
 
 class Kernel
 {

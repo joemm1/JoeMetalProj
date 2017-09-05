@@ -34,7 +34,7 @@ class Enemy : GameObject
 	var rotAxis:			float3
 	var rads =				0.0 as Float
 	
-	init(kernel: Kernel, enemyDescs: [EnemyDesc])
+	init(enemyDescs: [EnemyDesc])
 	{
 		let rx = Utils.RandomFloat(min: -1.0, max: 1.0)
 		let ry = Utils.RandomFloat(min: -1.0, max: 1.0)
@@ -63,13 +63,14 @@ class Enemy : GameObject
 		world[3] = translation
 		rotAxis = (selectedDesc.fullRotate) ? float3(rx, ry, rz) : float3(0, ry, 0)
 
-		let material = Material()
+		var material: Material?
 		if selectedDesc.randomColour
 		{
-			material.uniforms.baseColour = Utils.RandomColour()
+			material = Material(shaderDict: selectedDesc.mesh.subMeshes[0].material.shaderDict)
+			material!.uniforms.baseColour = Utils.RandomColour()
 		}
 
-		let meshInstance = MeshInstance(kernel: kernel, mesh: selectedDesc.mesh, world: world, overrideMaterial: material)
+		let meshInstance = MeshInstance(mesh: selectedDesc.mesh, world: world, overrideMaterial: material)
 		
 		super.init(meshInstance: meshInstance)
 	}
@@ -77,7 +78,7 @@ class Enemy : GameObject
 	override func update(_ dt: Float)
 	{
 		rads += dt
-		meshInstance.perMesh.world.rotate(dt, axis: rotAxis)
-		meshInstance.perMesh.world[3] = translation
+		meshInstance.meshInstUniforms.world.rotate(dt, axis: rotAxis)
+		meshInstance.meshInstUniforms.world[3] = translation
 	}
 }

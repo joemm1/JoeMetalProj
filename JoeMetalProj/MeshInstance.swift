@@ -10,16 +10,44 @@ import Foundation
 import Metal
 import simd
 
+class MeshInstanceUniforms : Uniforms
+{
+	var world =				float4x4()
+	var id =				int4()
+
+	static var nextId:		Int32 = 0
+
+	init(device: MTLDevice)
+	{
+		let sizeInBytes =	MemoryLayout<float4x4>.stride
+			+ 	MemoryLayout<int4>.stride
+		self.id.x = MeshInstanceUniforms.nextId
+		MeshInstanceUniforms.nextId = MeshInstanceUniforms.nextId + 1
+		super.init(device: device, binding: BindingSlots.kMeshInstance.rawValue, sizeInBytes: sizeInBytes)
+	}
+
+	override func copyIn(buffer: MTLBuffer)
+	{
+		var dest = buffer.contents()
+
+		memcpy(dest, &world, MemoryLayout<float4x4>.stride)
+		dest = dest.advanced(by: MemoryLayout<float4x4>.stride)
+
+		memcpy(dest, &id, MemoryLayout<Int>.stride)
+		dest = dest.advanced(by: MemoryLayout<Int>.stride)
+	}
+}
+
 class MeshInstance
 {
 	let mesh:						Mesh
-	var perMesh:					PerMeshUniforms
+	var meshInstUniforms:			MeshInstanceUniforms
 	var overrideMaterial:			Material?
 	
-	init(kernel: Kernel, mesh: Mesh, world: float4x4, overrideMaterial: Material?)
+	init(mesh: Mesh, world: float4x4, overrideMaterial: Material?)
 	{
-		perMesh = PerMeshUniforms(device: kernel.device)
-		perMesh.world = world
+		meshInstUniforms = MeshInstanceUniforms(device: gKernel.device)
+		meshInstUniforms.world = world
 
 		self.overrideMaterial = overrideMaterial
 		self.mesh = mesh
@@ -27,13 +55,13 @@ class MeshInstance
 	
 	func render(renderEncoder: MTLRenderCommandEncoder)
 	{
-		perMesh.bind(renderEncoder: renderEncoder)
-		mesh.render(renderEncoder: renderEncoder, overrideMaterial: overrideMaterial)
+		meshInstUniforms.bind(renderEncoder: renderEncoder)
+		mesh.render(renderEncoder: renderEncoder, materialOverride: overrideMaterial)
 	}
 	
 	func DoesWorldAabbIntersectAllHalfSpaces(_ planes: [float4]) -> Bool
 	{
-		let points = mesh.getWorldAabbPoints(world: perMesh.world)
+		let points = mesh.getWorldAabbPoints(world: meshInstUniforms.world)
 		if points.count == 0
 		{
 			return true

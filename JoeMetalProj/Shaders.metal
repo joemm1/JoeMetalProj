@@ -27,7 +27,7 @@ struct VertexOut
 	float2 uv;
 };
 
-struct PerPassUniforms
+struct PassUniforms
 {
     float4x4 	view;
     float4x4 	proj;
@@ -36,7 +36,7 @@ struct PerPassUniforms
 	float3		lightDir;
 };
 
-struct PerMeshUniforms
+struct MeshInstanceUniforms
 {
     float4x4 	world;
 	float3 		colour;
@@ -46,15 +46,15 @@ struct PerMeshUniforms
 
 vertex VertexOut basic_vertex(
                               const device VertexIn* vertex_array           [[ buffer(0) ]],
-                              const device PerPassUniforms& perPass         [[ buffer(1) ]],
-                              const device PerMeshUniforms& perMesh		   	[[ buffer(2) ]],
+                              const device PassUniforms& perPass       		[[ buffer(1) ]],
+                              const device MeshInstanceUniforms& meshInst	[[ buffer(2) ]],
                               unsigned int vid                              [[ vertex_id ]])
 {
     VertexIn VertexIn = vertex_array[vid];
 
     VertexOut VertexOut;
-    VertexOut.position = perPass.proj * perPass.view * perMesh.world * float4(VertexIn.position,1);
-	float3x3 world3x3(perMesh.world[0].xyz, perMesh.world[1].xyz, perMesh.world[2].xyz);
+    VertexOut.position = perPass.proj * perPass.view * meshInst.world * float4(VertexIn.position,1);
+	float3x3 world3x3(meshInst.world[0].xyz, meshInst.world[1].xyz, meshInst.world[2].xyz);
     VertexOut.normal = world3x3 * float3(VertexIn.normal);
 	if (kHasAnyTextureMap)
 		VertexOut.uv = VertexIn.uv;
@@ -63,8 +63,8 @@ vertex VertexOut basic_vertex(
 }
 
 fragment half4 basic_fragment(VertexOut 		interpolated					[[ stage_in ]],
-							  const device 		PerPassUniforms& perPass		[[ buffer(1) ]],
-							  const device		PerMeshUniforms& perMesh		[[ buffer(2) ]],
+							  const device 		PassUniforms& perPass			[[ buffer(1) ]],
+							  const device		MeshInstanceUniforms& meshInst	[[ buffer(2) ]],
 							  device			int* pickedBuffer				[[ buffer(3),	function_constant(kDoesPicking)  ]],
 							  texture2d<float>  albedoMap  						[[ texture(0),	function_constant(kHasAlbedoMap) ]],
 							  texture2d<float>  normalMap  						[[ texture(1),	function_constant(kHasNormalMap) ]],
@@ -91,9 +91,9 @@ fragment half4 basic_fragment(VertexOut 		interpolated					[[ stage_in ]],
 	{
 		float2 pixelPos = interpolated.position.xy;
 		if ( (pixelPos.x > perPass.pickRect.x) && (pixelPos.y > perPass.pickRect.y) && (pixelPos.x < perPass.pickRect.z) && (pixelPos.y < perPass.pickRect.w) )
-			pickedBuffer[0] = perMesh.id;
+			pickedBuffer[0] = meshInst.id;
 	}
 	
-	float4 col((diffuse + specular + ambient) * perMesh.colour, 1);
+	float4 col((diffuse + specular + ambient) * meshInst.colour, 1);
 	return (half4)col;
 }

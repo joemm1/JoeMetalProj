@@ -28,11 +28,11 @@
 		D89E33DD1F1FCF040006F5A3 /* JoeMetalProjUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D89E33DC1F1FCF040006F5A3 /* JoeMetalProjUITests.swift */; };
 		D89E33F61F1FCF650006F5A3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D89E33EB1F1FCF650006F5A3 /* AppDelegate.swift */; };
 		D89E33FB1F1FCF650006F5A3 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = D89E33F21F1FCF650006F5A3 /* Shaders.metal */; };
+		D8A1BAB71F59DB3C00F59B83 /* SubMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8A1BAB61F59DB3C00F59B83 /* SubMesh.swift */; };
 		D8BB06AC1F465602004F4A48 /* Data in Resources */ = {isa = PBXBuildFile; fileRef = D8BB06AB1F4655B0004F4A48 /* Data */; };
 		D8F143A91F54C16F0022041B /* PbmShader.metal in Sources */ = {isa = PBXBuildFile; fileRef = D8F143A81F54C16F0022041B /* PbmShader.metal */; };
 		D8F143AC1F5734DA0022041B /* Material.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8F143AB1F5734DA0022041B /* Material.swift */; };
-		D8FD394B1F223AF3003A548B /* RenderPass.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8FD394A1F223AF3003A548B /* RenderPass.swift */; };
-		D8FD39531F224564003A548B /* Uniforms.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8FD39521F224564003A548B /* Uniforms.swift */; };
+		D8FD394B1F223AF3003A548B /* Pass.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8FD394A1F223AF3003A548B /* Pass.swift */; };
 		D8FD39591F23E8EB003A548B /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8FD39581F23E8EB003A548B /* App.swift */; };
 		D8FD395C1F23EAA2003A548B /* TouchMgr.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8FD395B1F23EAA2003A548B /* TouchMgr.swift */; };
 		D8FD39601F23EE11003A548B /* Kernel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8FD395F1F23EE11003A548B /* Kernel.swift */; };
@@ -88,11 +88,11 @@
 		D89E33EB1F1FCF650006F5A3 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D89E33EE1F1FCF650006F5A3 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D89E33F21F1FCF650006F5A3 /* Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
+		D8A1BAB61F59DB3C00F59B83 /* SubMesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubMesh.swift; sourceTree = "<group>"; };
 		D8BB06AB1F4655B0004F4A48 /* Data */ = {isa = PBXFileReference; lastKnownFileType = text; name = Data; path = JoeMetalProj/Data; sourceTree = SOURCE_ROOT; };
 		D8F143A81F54C16F0022041B /* PbmShader.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = PbmShader.metal; sourceTree = "<group>"; };
 		D8F143AB1F5734DA0022041B /* Material.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Material.swift; sourceTree = "<group>"; };
-		D8FD394A1F223AF3003A548B /* RenderPass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RenderPass.swift; sourceTree = "<group>"; };
-		D8FD39521F224564003A548B /* Uniforms.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Uniforms.swift; sourceTree = "<group>"; };
+		D8FD394A1F223AF3003A548B /* Pass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pass.swift; sourceTree = "<group>"; };
 		D8FD39581F23E8EB003A548B /* App.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
 		D8FD395B1F23EAA2003A548B /* TouchMgr.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TouchMgr.swift; sourceTree = "<group>"; };
 		D8FD395F1F23EE11003A548B /* Kernel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Kernel.swift; sourceTree = "<group>"; };
@@ -138,17 +138,25 @@
 			name = Code;
 			sourceTree = "<group>";
 		};
-		D85F97C41F44334F00FB7BDE /* HighLevel */ = {
+		D85F97C41F44334F00FB7BDE /* Mesh */ = {
 			isa = PBXGroup;
 			children = (
-				D8FD394A1F223AF3003A548B /* RenderPass.swift */,
-				D8FD39521F224564003A548B /* Uniforms.swift */,
+				D8A1BAB61F59DB3C00F59B83 /* SubMesh.swift */,
+				D85F97C01F436B2700FB7BDE /* Mesh.swift */,
 				D85F97C21F436B6200FB7BDE /* Primitive.swift */,
 				D87C494B1F32449E0071EF45 /* Model.swift */,
+				D81213F21F4581E600327F31 /* MeshInstance.swift */,
+			);
+			name = Mesh;
+			sourceTree = "<group>";
+		};
+		D8641F841F5889C1007BAF4E /* Other */ = {
+			isa = PBXGroup;
+			children = (
 				D84438991F4B7C760090AC18 /* TextLayer.swift */,
 				D87C49491F31BF1C0071EF45 /* Particle.swift */,
 			);
-			name = HighLevel;
+			name = Other;
 			sourceTree = "<group>";
 		};
 		D89E33B01F1FCF030006F5A3 = {
@@ -207,7 +215,7 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
-		D8F143AA1F5734720022041B /* LowLevel */ = {
+		D8F143AA1F5734720022041B /* Core */ = {
 			isa = PBXGroup;
 			children = (
 				D8FD395F1F23EE11003A548B /* Kernel.swift */,
@@ -215,10 +223,10 @@
 				D87C49451F30F59D0071EF45 /* Shader.swift */,
 				D81214041F464F2800327F31 /* Texture.swift */,
 				D8F143AB1F5734DA0022041B /* Material.swift */,
-				D85F97C01F436B2700FB7BDE /* Mesh.swift */,
-				D81213F21F4581E600327F31 /* MeshInstance.swift */,
+				D8FD394A1F223AF3003A548B /* Pass.swift */,
+				D85F97C41F44334F00FB7BDE /* Mesh */,
 			);
-			name = LowLevel;
+			name = Core;
 			sourceTree = "<group>";
 		};
 		D8FD39541F224694003A548B /* Engine */ = {
@@ -235,8 +243,8 @@
 		D8FD39551F22469C003A548B /* Renderer */ = {
 			isa = PBXGroup;
 			children = (
-				D8F143AA1F5734720022041B /* LowLevel */,
-				D85F97C41F44334F00FB7BDE /* HighLevel */,
+				D8F143AA1F5734720022041B /* Core */,
+				D8641F841F5889C1007BAF4E /* Other */,
 			);
 			name = Renderer;
 			sourceTree = "<group>";
@@ -438,6 +446,7 @@
 				D81213F31F4581E600327F31 /* MeshInstance.swift in Sources */,
 				D8FD39601F23EE11003A548B /* Kernel.swift in Sources */,
 				D84438981F4B52FE0090AC18 /* ModelAsteroid.swift in Sources */,
+				D8A1BAB71F59DB3C00F59B83 /* SubMesh.swift in Sources */,
 				D87C49461F30F59D0071EF45 /* Shader.swift in Sources */,
 				D856494C1F3CDF4A00D069FD /* Buffer.swift in Sources */,
 				D89E33FB1F1FCF650006F5A3 /* Shaders.metal in Sources */,
@@ -450,7 +459,7 @@
 				D85F97C31F436B6200FB7BDE /* Primitive.swift in Sources */,
 				D8FD39661F240BAF003A548B /* Utils.swift in Sources */,
 				D8FD39591F23E8EB003A548B /* App.swift in Sources */,
-				D8FD394B1F223AF3003A548B /* RenderPass.swift in Sources */,
+				D8FD394B1F223AF3003A548B /* Pass.swift in Sources */,
 				D89E33F61F1FCF650006F5A3 /* AppDelegate.swift in Sources */,
 				D85F97C11F436B2700FB7BDE /* Mesh.swift in Sources */,
 				D8FD395C1F23EAA2003A548B /* TouchMgr.swift in Sources */,
@@ -458,7 +467,6 @@
 				D87C494C1F32449E0071EF45 /* Model.swift in Sources */,
 				D8FD39641F240558003A548B /* Enemy.swift in Sources */,
 				D89E33BF1F1FCF030006F5A3 /* ViewController.swift in Sources */,
-				D8FD39531F224564003A548B /* Uniforms.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

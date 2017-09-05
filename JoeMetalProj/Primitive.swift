@@ -21,14 +21,10 @@ struct Vertex
 	{
 		return [x, y, z, u, v, nx, ny, nz, 0, 0, 0, 0, 0, 0]
 	}
-	
 }
 
 class PrimitiveMesh: Mesh
 {
-	let vertexCount:        Int
-	let vertexBuffer:       MTLBuffer
-	
 	init(material: Material, vertices: Array<Vertex>, name: String)
 	{
 		var vertexData = Array<Float>()
@@ -38,9 +34,9 @@ class PrimitiveMesh: Mesh
 		}
 		
 		let dataSize = vertexData.count * MemoryLayout.size(ofValue: vertexData[0])
-		vertexBuffer = gKernel!.device.makeBuffer(bytes: vertexData, length: dataSize, options: [])!
-		
-		self.vertexCount = vertices.count
+		let vertexBuffer = gKernel.device.makeBuffer(bytes: vertexData, length: dataSize, options: [])!
+
+		let sm = SubMesh(material: material, primType: .triangle, vertexBuffer: vertexBuffer, vertexBufferOffset: 0, vertexCount: vertices.count)
 		
 		let fmin = Float.leastNormalMagnitude
 		let fmax = Float.greatestFiniteMagnitude
@@ -59,21 +55,13 @@ class PrimitiveMesh: Mesh
 			aabbMax.z = min(v.z, aabbMax.z)
 		}
 		
-		super.init(material: material, aabbMin: aabbMin, aabbMax: aabbMax, name: name)
-	}
-	
-	override func render(renderEncoder: MTLRenderCommandEncoder, overrideMaterial: Material?)
-	{
-		super.render(renderEncoder: renderEncoder, overrideMaterial: overrideMaterial)
-		
-		renderEncoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
-		renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertexCount, instanceCount: 1)
+		super.init(subMeshes: [sm], aabbMin: aabbMin, aabbMax: aabbMax, name: name)
 	}
 }
 
 class Cube: PrimitiveMesh
 {
-	init(kernel: Kernel, shaderDict: ShaderDict, texture: Texture)
+	init(shaderDict: ShaderDict, texture: Texture)
 	{
 		//top
 		let top0 = Vertex(x: -1.0, y:   1.0, z:  -1.0, nx:  0.0, ny:  1.0, nz:  0.0, u:	0.0, v:	0.0)
@@ -120,8 +108,9 @@ class Cube: PrimitiveMesh
 			frn0, frn2, frn1, frn0, frn3, frn2
 		]
 
-		let material = Material()
-		material.maps[TextureInputTypes.kBaseColour.rawValue] = texture
+		let maps = MaterialMaps()
+		maps[TextureInputTypes.kBaseColour.rawValue] = texture
+		let material = Material(shaderDict: shaderDict, maps: maps)
 		
 		super.init(material: material, vertices: verticesArray, name: "Cube")
 	}

@@ -11,9 +11,9 @@ import ModelIO
 
 class ModelAsteroid : ModelBase
 {
-	init(kernel: Kernel, shaderSet: ShaderSet, texture: Texture)
+	init(shaderDict: ShaderDict)
 	{
-		let sphere = MDLMesh.newEllipsoid(withRadii: float3(1, 1, 1), radialSegments: 10, verticalSegments: 10, geometryType: .triangles, inwardNormals: false, hemisphere: false, allocator: kernel.mtkBufAllocator)
+		let sphere = MDLMesh.newEllipsoid(withRadii: float3(1, 1, 1), radialSegments: 10, verticalSegments: 10, geometryType: .triangles, inwardNormals: false, hemisphere: false, allocator: gKernel.mtkBufAllocator)
 		
 		for vb in sphere.vertexBuffers
 		{
@@ -44,7 +44,7 @@ class ModelAsteroid : ModelBase
 		
 		sphere.addNormals(withAttributeNamed: MDLVertexAttributeNormal, creaseThreshold: 0.0)
 		
-		super.init(kernel: kernel, mdlMesh: sphere, shaderSet: shaderSet, texture: texture, name: "ModelSphere")
+		super.init(mdlMesh: sphere, shaderDict: shaderDict, name: "ModelSphere")
 	}
 	
 }

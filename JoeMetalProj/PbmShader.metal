@@ -31,10 +31,10 @@ constant bool kHasAnyMap = ( kHasBaseColourMap        	||
 //MARK: enums
 enum BufferIndices
 {
-	kBufferIndexVertices			= 0,
-	kBufferIndexPerPassUniforms  	= 1,
-	kBufferIndexPerMeshUniforms  	= 2,
-	kBufferIndexMaterialUniforms 	= 3
+	kBufferIndexVertices				= 0,
+	kBufferIndexPassUniforms	  		= 1,
+	kBufferIndexMeshInstanceUniforms  	= 2,
+	kBufferIndexMaterialUniforms 		= 3
 };
 
 enum VertexAttributes
@@ -74,7 +74,7 @@ struct Vertex
 	packed_float3 bitangent;
 };
 
-struct PerPassUniforms
+struct PassUniforms
 {
 	float4x4 	view;
 	float4x4 	proj;
@@ -83,7 +83,7 @@ struct PerPassUniforms
 	float3		lightDir;
 };
 
-struct PerMeshUniforms
+struct MeshInstanceUniforms
 {
 	float4x4 	world;
 	int			id;
@@ -93,8 +93,8 @@ struct PerMeshUniforms
 struct MaterialUniforms
 {
 	float3 		baseColor;
-	float3 		irradiatedColor;
 	float3 		roughness;
+	float3 		irradiatedColor;
 	float3 		metalness;
 	float       ambientOcclusion;
 	packed_int3 padding;
@@ -193,7 +193,7 @@ float3 ComputeSpecular(LightingParameters parameters)
 }
 
 LightingParameters CalculateParameters(VertexOut					in,
-									   constant PerPassUniforms & 	perPass,
+									   constant PassUniforms & 		passUniforms,
 									   constant MaterialUniforms & 	materialUniforms,
 									   texture2d<float>   			baseColorMap        [[ function_constant(kHasBaseColourMap) ]],
 									   texture2d<float>   			normalMap           [[ function_constant(kHasNormalMap) ]],
@@ -214,7 +214,7 @@ LightingParameters CalculateParameters(VertexOut					in,
 	else
 		parameters.normal = float3(in.normal);
 
-	parameters.viewDir = normalize(perPass.cameraPos - float3(in.worldPos));
+	parameters.viewDir = normalize(passUniforms.cameraPos - float3(in.worldPos));
 
 	if(kHasRoughnessMap)
 		parameters.roughness = max(roughnessMap.sample(linearSampler, in.uv).x, 0.001f);
@@ -243,8 +243,8 @@ LightingParameters CalculateParameters(VertexOut					in,
 		parameters.irradiatedColor = materialUniforms.irradiatedColor;
 	}
 
-	parameters.lightDir = -perPass.lightDir;
-	parameters.nDotl = max(0.001f,saturate(dot(parameters.normal, parameters.lightDir)));
+	parameters.lightDir = -passUniforms.lightDir;
+	parameters.nDotl = max(0.001f,saturate(dot(normalize(parameters.normal), parameters.lightDir)));
 
 	parameters.halfVector = normalize(parameters.lightDir + parameters.viewDir);
 	parameters.nDoth = max(0.001f,saturate(dot(parameters.normal, parameters.halfVector)));
@@ -255,43 +255,43 @@ LightingParameters CalculateParameters(VertexOut					in,
 }
 
 //MARK: entry functions
-vertex VertexOut VertexShader(//Vertex 							in 		[[stage_in]],
-							  const device Vertex* 				pIn     [[ buffer(kBufferIndexVertices) ]],
-							  unsigned int 						vid		[[ vertex_id ]],
-							  constant PerMeshUniforms & 		perMesh [[ buffer(kBufferIndexPerMeshUniforms) ]],
-							  constant PerPassUniforms &		perPass [[ buffer(kBufferIndexPerPassUniforms) ]])
+vertex VertexOut PbmVertexShader(//Vertex 							in 		[[stage_in]],
+								  const device Vertex* 				pIn     [[ buffer(kBufferIndexVertices) ]],
+								  unsigned int 						vid		[[ vertex_id ]],
+								  constant MeshInstanceUniforms & 	meshInst [[ buffer(kBufferIndexMeshInstanceUniforms) ]],
+								  constant PassUniforms &			passUniforms [[ buffer(kBufferIndexPassUniforms) ]])
 {
 	VertexOut out;
 
 	Vertex in = pIn[vid];
-	out.position = perPass.proj * perPass.view * perMesh.world * float4(in.position, 1.0);
+	out.position = passUniforms.proj * passUniforms.view * meshInst.world * float4(in.position, 1.0);
 
 	if (kHasAnyMap)
 		out.uv = in.uv;
 
 	// Rotate our tangents, bitangents, and normals by the normal matrix
-	const float3x3 world3x3 = float3x3(perMesh.world[0].xyz, perMesh.world[1].xyz, perMesh.world[2].xyz);
+	const float3x3 world3x3 = float3x3(meshInst.world[0].xyz, meshInst.world[1].xyz, meshInst.world[2].xyz);
 	out.tangent   = world3x3 * float3(in.tangent);
 	out.bitangent = world3x3 * float3(in.bitangent);
 	out.normal    = world3x3 * float3(in.normal);
-	out.worldPos  = (perMesh.world * float4(in.position, 1.0)).xyz;
+	out.worldPos  = (meshInst.world * float4(in.position, 1.0)).xyz;
 
 	return out;
 }
 
-fragment float4 FragmentShader(VertexOut					in 					[[ stage_in ]],
-							   constant PerPassUniforms & 	perPassUniforms    	[[ buffer(kBufferIndexPerPassUniforms) ]],
-							   constant PerMeshUniforms & 	perMeshUniforms    	[[ buffer(kBufferIndexPerMeshUniforms) ]],
-							   constant MaterialUniforms & 	materialUniforms 	[[ buffer(kBufferIndexMaterialUniforms) ]],
-							   texture2d<float>   			baseColorMap        [[ texture(kTextureIndexBaseColor),        function_constant(kHasBaseColourMap) ]],
-							   texture2d<float>   			normalMap           [[ texture(kTextureIndexNormal),           function_constant(kHasNormalMap) ]],
-							   texture2d<float>   			metallicMap         [[ texture(kTextureIndexMetallic),         function_constant(kHasMetallicMap) ]],
-							   texture2d<float>   			roughnessMap        [[ texture(kTextureIndexRoughness),        function_constant(kHasRoughnessMap) ]],
-							   texture2d<float>   			ambientOcclusionMap [[ texture(kTextureIndexAmbientOcclusion), function_constant(kHasAoMap) ]],
-							   texturecube<float> 			irradianceMap       [[ texture(kTextureIndexIrradianceMap),    function_constant(kHasIrradianceMap)]])
+fragment float4 PbmFragmentShader(VertexOut						in 					[[ stage_in ]],
+								   constant PassUniforms & 		passUniforms    	[[ buffer(kBufferIndexPassUniforms) ]],
+								   constant MeshInstanceUniforms & 	meshInst	   	[[ buffer(kBufferIndexMeshInstanceUniforms) ]],
+								   constant MaterialUniforms & 	materialUniforms 	[[ buffer(kBufferIndexMaterialUniforms) ]],
+								   texture2d<float>   			baseColorMap        [[ texture(kTextureIndexBaseColor),        function_constant(kHasBaseColourMap) ]],
+								   texture2d<float>   			normalMap           [[ texture(kTextureIndexNormal),           function_constant(kHasNormalMap) ]],
+								   texture2d<float>   			metallicMap         [[ texture(kTextureIndexMetallic),         function_constant(kHasMetallicMap) ]],
+								   texture2d<float>   			roughnessMap        [[ texture(kTextureIndexRoughness),        function_constant(kHasRoughnessMap) ]],
+								   texture2d<float>   			ambientOcclusionMap [[ texture(kTextureIndexAmbientOcclusion), function_constant(kHasAoMap) ]],
+									texturecube<float> 			irradianceMap       [[ texture(kTextureIndexIrradianceMap),    function_constant(kHasIrradianceMap)]])
 {
 	LightingParameters parameters = CalculateParameters(in,
-														perPassUniforms,
+														passUniforms,
 														materialUniforms,
 														baseColorMap,
 														normalMap,

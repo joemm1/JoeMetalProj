@@ -8,6 +8,7 @@
 
 import Foundation
 import Metal
+import simd
 
 enum TextureInputTypes : Int
 {
@@ -26,40 +27,109 @@ enum FunctionConstants: Int
 {
 	//must match entries in shader
 	case kBaseColour
+	case kNormal
 	case kMetallic
 	case kRoughness
-	case kNormal
 	case kAmbientOcclusion
 	case kIrradianceMap
 
 	case kNum
 }
 
-class Material
+class MaterialUniforms : Uniforms
 {
-	var uniforms =			MaterialUniforms(device: gKernel!.device)
+	var baseColour = 				float3(1.0, 1.0, 1.0)
+	var roughness = 				float3(0.2, 0.2, 0.2)
+	var irradiatedColor = 			float3(1.0, 1.0, 1.0)
+	var metalness = 				float3(0.0, 0.0, 0.0)
+	var ambientOcclusion = 			Float(1.0)
+
+	init()
+	{
+		let sizeInBytes = (MemoryLayout<float3>.stride * 5)
+		super.init(device: gKernel.device, binding: BindingSlots.kMaterial.rawValue, sizeInBytes: sizeInBytes)
+	}
+
+	override func copyIn(buffer: MTLBuffer)
+	{
+		var dest = buffer.contents()
+
+		memcpy(dest, &baseColour, MemoryLayout<float3>.stride)
+		dest = dest.advanced(by: MemoryLayout<float3>.stride)
+
+		memcpy(dest, &roughness, MemoryLayout<float3>.stride)
+		dest = dest.advanced(by: MemoryLayout<float3>.stride)
+
+		memcpy(dest, &irradiatedColor, MemoryLayout<float3>.stride)
+		dest = dest.advanced(by: MemoryLayout<float3>.stride)
+
+		memcpy(dest, &metalness, MemoryLayout<float3>.stride)
+		dest = dest.advanced(by: MemoryLayout<float3>.stride)
+
+		memcpy(dest, &ambientOcclusion, MemoryLayout<Float>.stride)
+		dest = dest.advanced(by: MemoryLayout<Float>.stride)
+	}
+}
+
+class MaterialMaps
+{
 	var maps:				[Texture?]
-	var shaderSet:			ShaderSet?
-	let sampler:			MTLSamplerState
 
 	init()
 	{
 		maps = [Texture?](repeating: nil, count: TextureInputTypes.kNum.rawValue)
+	}
+
+	subscript(index: Int) -> Texture?
+	{
+		get { return maps[index] }
+		set(tex) { maps[index] = tex }
+	}
+
+	var count: Int { return maps.count }
+}
+
+class Material
+{
+	var uniforms:			MaterialUniforms
+	let maps:				MaterialMaps
+	let shaderDict:			ShaderDict
+	let sampler:			MTLSamplerState
+	let pipelineState:      MTLRenderPipelineState
+
+	init(shaderDict: ShaderDict, maps: MaterialMaps = MaterialMaps(), uniforms: MaterialUniforms = MaterialUniforms())
+	{
+		self.shaderDict = shaderDict
+		self.maps = maps
+		self.uniforms = uniforms
 
 		//#todo
 		let desc = MTLSamplerDescriptor()
-		sampler = gKernel!.device.makeSamplerState(descriptor: desc)!
-	}
+		sampler = gKernel.device.makeSamplerState(descriptor: desc)!
 
-	func calcShaderSet(shaderDict: ShaderDict)
-	{
 		var permFlags = ShaderPermFlags(indexCount: FunctionConstants.kNum.rawValue)
 		permFlags.add(index: FunctionConstants.kBaseColour.rawValue, value: (maps[TextureInputTypes.kBaseColour.rawValue] != nil))
-		shaderSet = shaderDict.get(perms: permFlags)
+		permFlags.add(index: FunctionConstants.kNormal.rawValue, value: (maps[TextureInputTypes.kNormal.rawValue] != nil))
+		permFlags.add(index: FunctionConstants.kNormal.rawValue, value: (maps[TextureInputTypes.kNormal.rawValue] != nil))
+		permFlags.add(index: FunctionConstants.kMetallic.rawValue, value: (maps[TextureInputTypes.kMetallic.rawValue] != nil))
+		permFlags.add(index: FunctionConstants.kRoughness.rawValue, value: (maps[TextureInputTypes.kRoughness.rawValue] != nil))
+		permFlags.add(index: FunctionConstants.kAmbientOcclusion.rawValue, value: (maps[TextureInputTypes.kAmbientOcclusion.rawValue] != nil))
+		permFlags.add(index: FunctionConstants.kIrradianceMap.rawValue, value: (maps[TextureInputTypes.kIrradianceMap.rawValue] != nil))
+		let ss = shaderDict.get(perms: permFlags)
+
+		let pipelineStateDescriptor = MTLRenderPipelineDescriptor()
+		pipelineStateDescriptor.vertexFunction = ss.vertexProgram
+		pipelineStateDescriptor.fragmentFunction = ss.fragmentProgram
+		pipelineStateDescriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
+		pipelineStateDescriptor.depthAttachmentPixelFormat = .depth32Float
+
+		self.pipelineState = try! gKernel.device.makeRenderPipelineState(descriptor: pipelineStateDescriptor)
 	}
 
 	func bind(renderEncoder: MTLRenderCommandEncoder)
 	{
+		renderEncoder.setRenderPipelineState(pipelineState)
+
 		uniforms.bind(renderEncoder: renderEncoder)
 
 		for m in 0..<maps.count

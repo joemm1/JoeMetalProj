@@ -16,8 +16,8 @@ class ShaderSet
 	
 	init(vsName: String, fsName: String, fnConstantValues: MTLFunctionConstantValues)
 	{
-		vertexProgram = try! gKernel!.defaultLibrary.makeFunction(name: vsName, constantValues: fnConstantValues)
-		fragmentProgram = try! gKernel!.defaultLibrary.makeFunction(name: fsName, constantValues: fnConstantValues)
+		vertexProgram = try! gKernel.defaultLibrary.makeFunction(name: vsName, constantValues: fnConstantValues)
+		fragmentProgram = try! gKernel.defaultLibrary.makeFunction(name: fsName, constantValues: fnConstantValues)
 	}
 }
 
@@ -39,7 +39,10 @@ struct ShaderPermFlags: Hashable
 	{
 		values[index] = value
 		flags &= ~(1 << index)
-		flags |= (1 << index)
+		if value
+		{
+			flags |= (1 << index)
+		}
 		fnConstantValues.setConstantValue(&values[index], type: .bool, index: index)
 	}
 
@@ -69,14 +72,15 @@ class ShaderDict
 
 	func get(perms: ShaderPermFlags) -> ShaderSet
 	{
-		if dict[perms] != nil
+		if let shaderSet = dict[perms]
 		{
-			return dict[perms]!
+			return shaderSet
 		}
 		else
 		{
-			dict[perms] = ShaderSet(vsName: vsName, fsName: fsName, fnConstantValues: perms.fnConstantValues)
-			return dict[perms]!
+			let shaderSet = ShaderSet(vsName: vsName, fsName: fsName, fnConstantValues: perms.fnConstantValues)
+			dict[perms] = shaderSet
+			return shaderSet
 		}
 	}
 }

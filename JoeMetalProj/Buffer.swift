@@ -32,3 +32,32 @@ class Buffer
 	}
 }
 
+class Uniforms : Buffer
+{
+	let sizeInBytes:			Int
+
+	enum BindingSlots : Int
+	{
+		case kVertices
+		case kPass
+		case kMeshInstance
+		case kMaterial
+	}
+
+	init(device: MTLDevice, binding: Int, sizeInBytes: Int)
+	{
+		self.sizeInBytes = sizeInBytes
+		super.init(device: device, sizeInBytes: sizeInBytes, slot: binding)
+	}
+
+	override func bind(renderEncoder: MTLRenderCommandEncoder)
+	{
+		copyIn(buffer: super.mtlBuffer)
+		super.bind(renderEncoder: renderEncoder)
+	}
+
+	func copyIn(buffer: MTLBuffer)
+	{
+		assert(false, "This method must be overridden")
+	}
+}

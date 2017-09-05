@@ -24,7 +24,7 @@ class Texture
 
 		let path = Bundle.main.path(forResource: path, ofType: ext)!
 		let data = try! NSData(contentsOfFile: path) as Data
-		mtlTex = try! gKernel!.textureLoader.newTexture(with: data, options: options)
+		mtlTex = try! gKernel.textureLoader.newTexture(with: data, options: nil)//options)
 	}
 
 	init(url: URL)
@@ -37,6 +37,6 @@ class Texture
 
 		let path = Bundle.main.path(forResource: url.deletingPathExtension().absoluteString, ofType: url.pathExtension)!
 		let data = try! NSData(contentsOfFile: path) as Data
-		mtlTex = try! gKernel!.textureLoader.newTexture(with: data, options: options)
+		mtlTex = try! gKernel.textureLoader.newTexture(with: data, options: options)
 	}
 }

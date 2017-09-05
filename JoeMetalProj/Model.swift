@@ -12,7 +12,7 @@ import MetalKit
 
 struct ModelDesc
 {
-	let shaderSet: 			ShaderSet
+	let shaderDict: 		ShaderDict
 	let modelName: 			String
 	let modelExt: 			String
 	let calcNormals:		Bool
@@ -20,30 +20,65 @@ struct ModelDesc
 
 class ModelBase : Mesh
 {
+	let mdlMesh:			MDLMesh
 	let mtkMesh: 			MTKMesh
-	let texture:			Texture
-	let sampler:			MTLSamplerState
 	
-	init(kernel: Kernel, mdlMesh: MDLMesh, shaderSet: ShaderSet, texture: Texture, name: String)
+	init(mdlMesh: MDLMesh, shaderDict: ShaderDict, name: String, overrideBaseColourMap: Texture? = nil)
 	{
-		mtkMesh = try! MTKMesh(mesh: mdlMesh, device: kernel.device)
-		
-		self.texture = texture
-		
-		let samplerDesc = MTLSamplerDescriptor()
-		sampler = kernel.device.makeSamplerState(descriptor: samplerDesc)!
+		self.mdlMesh = mdlMesh
+		mtkMesh = try! MTKMesh(mesh: mdlMesh, device: gKernel.device)
 		
 		let mn = mdlMesh.boundingBox.minBounds
 		let aabbMin = float3(mn.x, mn.y, mn.z)
 		let mx = mdlMesh.boundingBox.maxBounds
 		let aabbMax = float3(mx.x, mx.y, mx.z)
 
-		let material = Material()
+		//#todo handle multiple vb streams via vertex descriptors
+		if mtkMesh.vertexBuffers.count > 1
+		{
+			fatalError("Mesh \(name) has >1 buffer => ignoring")
+		}
+		let vb = mtkMesh.vertexBuffers[0]
+
+		var subMeshes = [SubMesh]()
 		for sm in 0..<mdlMesh.submeshes!.count
 		{
-			let submesh = mdlMesh.submeshes![sm] as! MDLSubmesh
+			let mdlSm = mdlMesh.submeshes![sm] as! MDLSubmesh
+			let mtkSm = mtkMesh.submeshes[sm]
 
-			ModelBase.setUpMaterialProperty(mdlMaterial: submesh.material!, semantic: MDLMaterialSemantic.baseColor, texture: &material.maps[TextureInputTypes.kBaseColour.rawValue], uniform: &material.uniforms.baseColour)
+			let maps = MaterialMaps()
+			let uniforms = MaterialUniforms()
+
+			if let baseColourMap = overrideBaseColourMap
+			{
+				maps[TextureInputTypes.kBaseColour.rawValue] = baseColourMap}
+			else
+			{
+				ModelBase.setUpMaterialProperty(mdlMaterial: mdlSm.material!, semantic: MDLMaterialSemantic.baseColor, texture: &maps[TextureInputTypes.kBaseColour.rawValue], uniform: &uniforms.baseColour)
+			}
+
+			ModelBase.setUpMaterialProperty(mdlMaterial: mdlSm.material!, semantic: MDLMaterialSemantic.metallic, texture: &maps[TextureInputTypes.kMetallic.rawValue], uniform: &uniforms.metalness)
+
+			ModelBase.setUpMaterialProperty(mdlMaterial: mdlSm.material!, semantic: MDLMaterialSemantic.roughness, texture: &maps[TextureInputTypes.kRoughness.rawValue], uniform: &uniforms.roughness)
+
+			ModelBase.setUpMaterialProperty(mdlMaterial: mdlSm.material!, semantic: MDLMaterialSemantic.tangentSpaceNormal, texture: &maps[TextureInputTypes.kNormal.rawValue], uniform: nil)
+
+			ModelBase.setUpMaterialProperty(mdlMaterial: mdlSm.material!, semantic: MDLMaterialSemantic.ambientOcclusion, texture: &maps[TextureInputTypes.kAmbientOcclusion.rawValue], uniform: &uniforms.ambientOcclusion)
+
+			//#todo
+			//ModelBase.setUpMaterialProperty(mdlMaterial: mdlSm.material!, semantic: MDLMaterialSemantic.irradiatedColor, texture: &maps[TextureInputTypes.kIrradianceMap.rawValue], uniform: &uniforms.irradiatedColor)
+
+			let material = Material(shaderDict: shaderDict, maps: maps, uniforms: uniforms)
+
+			let sm = SubMesh(material: material, primType: mtkSm.primitiveType, vertexBuffer: vb.buffer, vertexBufferOffset: vb.offset, vertexCount: mtkMesh.vertexCount, indexBuffer: mtkSm.indexBuffer.buffer, indexCount: mtkSm.indexCount, indexType: mtkSm.indexType, indexOffset: mtkSm.indexBuffer.offset)
+			subMeshes.append(sm)
+
+			//jmmtemp
+			for p in 0..<mdlSm.material!.count
+			{
+				let prop = mdlSm.material![p]
+				print("Semantic: \(String(describing: prop!.semantic))")
+			}
 		}
 		
 		#if DEBUG
@@ -65,51 +100,32 @@ class ModelBase : Mesh
 			print("  Total index count: \(cumIndexCount)")
 		#endif
 		
-		super.init(material: material, aabbMin: aabbMin, aabbMax: aabbMax, name: name)
+		super.init(subMeshes: subMeshes, aabbMin: aabbMin, aabbMax: aabbMax, name: name)
 	}
 
 	static func setUpMaterialProperty(mdlMaterial: MDLMaterial,
-	                           semantic: MDLMaterialSemantic,
-	                           texture: inout Texture?,
-	                           uniform: UnsafeMutableRawPointer)
+	                                  semantic: MDLMaterialSemantic,
+	                                  texture: inout Texture?,
+	                                  uniform: UnsafeMutableRawPointer?)
 	{
-		let property = mdlMaterial.property(with: semantic)
-		if property != nil
+		let prop = mdlMaterial.property(with: semantic)
+		if let prop = prop
 		{
-			let prop = property!
 			if prop.type == MDLMaterialPropertyType.string
 			{
 				texture = Texture(url: URL(string: prop.stringValue!)!)
 			}
-			else if prop.type == MDLMaterialPropertyType.float
+			else if let uniform = uniform
 			{
-				memcpy(uniform, &prop.floatValue, MemoryLayout<Float>.stride)
+				if prop.type == MDLMaterialPropertyType.float
+				{
+					memcpy(uniform, &prop.floatValue, MemoryLayout<Float>.stride)
+				}
+				else if prop.type == MDLMaterialPropertyType.float3
+				{
+					memcpy(uniform, &prop.float3Value, MemoryLayout<Float>.stride * 3)
+				}
 			}
-			else if prop.type == MDLMaterialPropertyType.float3
-			{
-				memcpy(uniform, &prop.float3Value, MemoryLayout<Float>.stride * 3)
-			}
-		}
-	}
-	
-	override func render(renderEncoder: MTLRenderCommandEncoder, overrideMaterial: Material?)
-	{
-		super.render(renderEncoder: renderEncoder, overrideMaterial: overrideMaterial)
-
-		if mtkMesh.vertexBuffers.count > 1
-		{
-			print("Mesh has >1 buffer => ignoring")
-		}
-
-		let vb = mtkMesh.vertexBuffers[0]
-		renderEncoder.setVertexBuffer(vb.buffer, offset: vb.offset, index: 0)
-
-		renderEncoder.setFragmentSamplerState(sampler, index: 0)
-		renderEncoder.setFragmentTexture(texture.mtlTex, index: 0)
-		
-		for subMesh in mtkMesh.submeshes
-		{
-			renderEncoder.drawIndexedPrimitives(type: subMesh.primitiveType, indexCount: subMesh.indexCount, indexType: subMesh.indexType, indexBuffer: subMesh.indexBuffer.buffer, indexBufferOffset: subMesh.indexBuffer.offset, instanceCount: 1)
 		}
 	}
 }
@@ -118,7 +134,7 @@ class Model : ModelBase
 {
 	let modelDesc:			ModelDesc
 	
-	init(kernel: Kernel, modelDesc: ModelDesc, texture: Texture)
+	init(modelDesc: ModelDesc, overrideBaseColourMap: Texture? = nil, modelIndex: Int = 0)
 	{
 		guard let url = Bundle.main.url(forResource: modelDesc.modelName, withExtension: modelDesc.modelExt)
 			else
@@ -151,15 +167,15 @@ class Model : ModelBase
 		let layout = desc.layouts[0] as! MDLVertexBufferLayout
 		layout.stride = 56
 		
-		let asset = MDLAsset(url:url, vertexDescriptor: desc, bufferAllocator: kernel.mtkBufAllocator)
+		let asset = MDLAsset(url:url, vertexDescriptor: desc, bufferAllocator: gKernel.mtkBufAllocator)
 
-		//#todo: iterate over MDLMesh objects in MDLAsset
-		guard let mdlMesh = asset.object(at: 0) as? MDLMesh
-			else
+		guard let mdlMesh = asset.object(at: modelIndex) as? MDLMesh
+		else
 		{
-			fatalError("Failed to get mesh \(modelDesc.modelName) from asset.")
+			fatalError("Failed to get model index \(modelIndex) from asset \(modelDesc.modelName)")
 		}
-		
+
+		//#todo - auto-detect when this needs to be done
 		if modelDesc.calcNormals
 		{
 			let start = Date()
@@ -171,7 +187,7 @@ class Model : ModelBase
 		
 		self.modelDesc = modelDesc
 		
-		super.init(kernel: kernel, mdlMesh: mdlMesh, shaderSet: modelDesc.shaderSet, texture: texture, name: modelDesc.modelName)
+		super.init(mdlMesh: mdlMesh, shaderDict: modelDesc.shaderDict, name: modelDesc.modelName, overrideBaseColourMap: overrideBaseColourMap)
 	}
 }
 
