@@ -44,7 +44,7 @@ class MeshInstance
 	var meshInstUniforms:			MeshInstanceUniforms
 	var overrideMaterial:			Material?
 	
-	init(mesh: Mesh, world: float4x4, overrideMaterial: Material?)
+	init(mesh: Mesh, world: float4x4, overrideMaterial: Material? = nil)
 	{
 		meshInstUniforms = MeshInstanceUniforms(device: gKernel.device)
 		meshInstUniforms.world = world

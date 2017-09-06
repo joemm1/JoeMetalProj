@@ -39,10 +39,11 @@ enum FunctionConstants: Int
 class MaterialUniforms : Uniforms
 {
 	var baseColour = 				float3(1.0, 1.0, 1.0)
-	var roughness = 				float3(0.2, 0.2, 0.2)
-	var irradiatedColor = 			float3(1.0, 1.0, 1.0)
-	var metalness = 				float3(0.0, 0.0, 0.0)
+	var roughness = 				Float(0.2)
+	var metalness = 				Float(0.0)
 	var ambientOcclusion = 			Float(1.0)
+	var padding =					Float(0.0)
+	var irradiatedColor = 			float3(1.0, 1.0, 1.0)
 
 	init()
 	{
@@ -57,17 +58,19 @@ class MaterialUniforms : Uniforms
 		memcpy(dest, &baseColour, MemoryLayout<float3>.stride)
 		dest = dest.advanced(by: MemoryLayout<float3>.stride)
 
-		memcpy(dest, &roughness, MemoryLayout<float3>.stride)
-		dest = dest.advanced(by: MemoryLayout<float3>.stride)
+		memcpy(dest, &roughness, MemoryLayout<Float>.stride)
+		dest = dest.advanced(by: MemoryLayout<Float>.stride)
 
-		memcpy(dest, &irradiatedColor, MemoryLayout<float3>.stride)
-		dest = dest.advanced(by: MemoryLayout<float3>.stride)
-
-		memcpy(dest, &metalness, MemoryLayout<float3>.stride)
-		dest = dest.advanced(by: MemoryLayout<float3>.stride)
+		memcpy(dest, &metalness, MemoryLayout<Float>.stride)
+		dest = dest.advanced(by: MemoryLayout<Float>.stride)
 
 		memcpy(dest, &ambientOcclusion, MemoryLayout<Float>.stride)
 		dest = dest.advanced(by: MemoryLayout<Float>.stride)
+
+		dest = dest.advanced(by: MemoryLayout<Float>.stride)
+
+		memcpy(dest, &irradiatedColor, MemoryLayout<float3>.stride)
+		dest = dest.advanced(by: MemoryLayout<float3>.stride)
 	}
 }
 

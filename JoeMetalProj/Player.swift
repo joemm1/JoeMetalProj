@@ -2,45 +2,27 @@
 //  Player.swift
 //  JoeMetalProj
 //
-//  Created by Joe Milner-Moore on 24/07/2017.
+//  Created by Joe Milner-Moore on 05/09/2017.
 //  Copyright © 2017 Joe Milner-Moore. All rights reserved.
 //
 
 import Foundation
 import simd
 
-class Player
+class Player : GameObject
 {
-	var cameraTransform =					float4x4()
-	var viewMatrix:							float4x4 { return cameraTransform.inverse }
-	
-	var swipeVelocity =						float2(0.0, 0.0)
+	let touchMgr:					TouchMgr
 
-	func update(_ dt: Float, touchMgr: TouchMgr)
+	init(transform: float4x4, mesh: Mesh, touchMgr: TouchMgr)
 	{
-		var translate = cameraTransform[3]
-		cameraTransform[3] = float4(0, 0, 0, 1)
-		
-		if touchMgr.status == .swiping
-		{
-			swipeVelocity = float2(touchMgr.lastDir.0, touchMgr.lastDir.1)
-		}
-		else
-		{
-			swipeVelocity *= 0.9
-		}
-		
-		if abs(swipeVelocity.x) > 0.01
-		{
-			cameraTransform.rotate(-dt * swipeVelocity.x * 0.2, axis: float3(0, 1, 0))
-		}
+		self.touchMgr = touchMgr
+		let meshInstance = MeshInstance(mesh: mesh, world: transform)
 
-		var negZ = float4(0.0, 0.0, 1.0, 0.0)
-		negZ = cameraTransform * negZ
-		translate += negZ * dt * swipeVelocity.y
-		translate.w = 1
-		
-		cameraTransform[3] = translate
-		
+		super.init(meshInstance: meshInstance)
+	}
+
+	override func update(_ dt: Float)
+	{
+		meshInstance.meshInstUniforms.world[3] += float4(0, 0, -dt, 1)
 	}
 }

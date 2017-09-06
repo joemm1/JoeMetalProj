@@ -41,8 +41,8 @@ class Enemy : GameObject
 		let rz = Utils.RandomFloat(min: -1.0, max: 1.0)
 		
 		let theta = Utils.RandomFloat(min: 0.0, max: 2.0 * .pi)
-		let r = Utils.RandomFloat(min: 2.0, max: 40.0)
-		let y = Utils.RandomFloat(min: -4.0, max: 4.0)
+		let r = Utils.RandomFloat(min: 2.0, max: 20.0)
+		let y = Float(0.0)//Utils.RandomFloat(min: -4.0, max: 4.0)
 		translation = float4(r * cos(theta), y, r * sin(theta), 1)
 		
 		let p = Utils.RandomFloat(min: 0.0, max: 1.0)

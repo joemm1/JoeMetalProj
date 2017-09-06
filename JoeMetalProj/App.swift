@@ -23,17 +23,19 @@ class App
 	let shaderDict:			ShaderDict
 	
 	var gameObjects =		Array<GameObject>()
-	var player =			Player()
-	let kNumEnemies =		10 //jmmtemp 150
+	var camera:				Camera
+	var player:				Player?
+	let kNumEnemies =		100 //jmmtemp 150
+
+	let verticalScroller =	true
 	
-	let r2 = 				false//true
+	let r2 = 				true
 	let xwing = 			false
 	let bb = 				false
-	let rocket = 			false
 	let mill =				true
-	let tree =				false//true
+	let tree =				true
 	let house = 			false
-	let car = 				false//true
+	let car = 				false
 	
 	enum FunctionConstants: Int
 	{
@@ -64,7 +66,7 @@ class App
 			let xDesc = ModelDesc(shaderDict: shaderDict, modelName: "Data/X-Fighter", modelExt: "obj", calcNormals: false)
 			let tex = Texture(path: "Data/XWing_Diffuse_01", ext: "jpg")
 			let xModel = Model(modelDesc: xDesc, overrideBaseColourMap: tex)
-			enemyDescs.append(EnemyDesc(prob: prob, mesh: xModel, scale: 0.01, fullRotate: false, randomColour: false))
+			enemyDescs.append(EnemyDesc(prob: prob, mesh: xModel, scale: 0.01, fullRotate: verticalScroller, randomColour: false))
 		}
 		if r2
 		{
@@ -73,7 +75,7 @@ class App
 			let r2Desc = ModelDesc(shaderDict: shaderDict, modelName: "Data/R2-Unit", modelExt: "obj", calcNormals: false)
 			let tex = Texture(path: "Data/R2D2_Diffuse", ext: "jpg")
 			let r2Model = Model(modelDesc: r2Desc, overrideBaseColourMap: tex)
-			enemyDescs.append(EnemyDesc(prob: prob, mesh: r2Model, scale: 0.01, fullRotate: false, randomColour: false))
+			enemyDescs.append(EnemyDesc(prob: prob, mesh: r2Model, scale: 0.01, fullRotate: verticalScroller, randomColour: false))
 		}
 		if bb
 		{
@@ -82,23 +84,15 @@ class App
 			let bbDesc = ModelDesc(shaderDict: shaderDict, modelName: "Data/BB-Unit", modelExt: "obj", calcNormals: false)
 			let tex = Texture(path: "Data/Body_Diffuse", ext: "jpg")
 			let bbModel = Model(modelDesc: bbDesc, overrideBaseColourMap: tex)
-			enemyDescs.append(EnemyDesc(prob: prob, mesh: bbModel, scale: 0.01, fullRotate: false, randomColour: false))
-		}
-		if rocket
-		{
-			let prob = 0.1 as Float
-			cumProb += prob
-			let rocketDesc = ModelDesc(shaderDict: shaderDict, modelName: "Data/retro_rocket", modelExt: "obj", calcNormals: true)
-			let rocketModel = Model(modelDesc: rocketDesc, overrideBaseColourMap: defaultTex)
-			enemyDescs.append(EnemyDesc(prob: prob, mesh: rocketModel, scale: 0.01, fullRotate: false, randomColour: false))
+			enemyDescs.append(EnemyDesc(prob: prob, mesh: bbModel, scale: 0.01, fullRotate: verticalScroller, randomColour: false))
 		}
 		if mill
 		{
-			let prob = 10 as Float //jmmtemp 0.1 as Float
+			let prob = 0.1 as Float
 			cumProb += prob
 			let millDesc = ModelDesc(shaderDict: shaderDict, modelName: "Data/low-poly-mill", modelExt: "obj", calcNormals: true)
 			let millModel = Model(modelDesc: millDesc)
-			enemyDescs.append(EnemyDesc(prob: prob, mesh: millModel, scale: 0.01, fullRotate: false, randomColour: false))
+			enemyDescs.append(EnemyDesc(prob: prob, mesh: millModel, scale: 0.01, fullRotate: verticalScroller, randomColour: false))
 		}
 		if tree
 		{
@@ -106,7 +100,7 @@ class App
 			cumProb += prob
 			let desc = ModelDesc(shaderDict: shaderDict, modelName: "Data/lowpolytree", modelExt: "obj", calcNormals: false)
 			let model = Model(modelDesc: desc, overrideBaseColourMap: defaultTex)
-			enemyDescs.append(EnemyDesc(prob: prob, mesh: model, scale: 0.1, fullRotate: false, randomColour: false))
+			enemyDescs.append(EnemyDesc(prob: prob, mesh: model, scale: 0.1, fullRotate: verticalScroller, randomColour: false))
 		}
 		if house
 		{
@@ -114,7 +108,7 @@ class App
 			cumProb += prob
 			let desc = ModelDesc(shaderDict: shaderDict, modelName: "Data/house_10", modelExt: "obj", calcNormals: false)
 			let model = Model(modelDesc: desc, overrideBaseColourMap: defaultTex)
-			enemyDescs.append(EnemyDesc(prob: prob, mesh: model, scale: 0.1, fullRotate: false, randomColour: false))
+			enemyDescs.append(EnemyDesc(prob: prob, mesh: model, scale: 0.1, fullRotate: verticalScroller, randomColour: false))
 		}
 		if car
 		{
@@ -122,7 +116,7 @@ class App
 			cumProb += prob
 			let desc = ModelDesc(shaderDict: shaderDict, modelName: "Data/Car_Obj", modelExt: "obj", calcNormals: true)
 			let model = Model(modelDesc: desc, overrideBaseColourMap: defaultTex)
-			enemyDescs.append(EnemyDesc(prob: prob, mesh: model, scale: 0.1, fullRotate: false, randomColour: false))
+			enemyDescs.append(EnemyDesc(prob: prob, mesh: model, scale: 0.1, fullRotate: verticalScroller, randomColour: false))
 		}
 		
 		//other
@@ -132,11 +126,35 @@ class App
 			//let model = ModelAsteroid(shaderDict: shaderDict)
 			enemyDescs.append(EnemyDesc(prob: (1 - cumProb) * 0.2, mesh: model, scale: 0.5, fullRotate: true, randomColour: true))
 		}
-		
+
+		//game objects list
 		for _ in 0..<kNumEnemies
 		{
 			let obj = Enemy(enemyDescs: enemyDescs)
 			gameObjects.append(obj)
+		}
+
+		//player
+		if verticalScroller
+		{
+			let desc = ModelDesc(shaderDict: shaderDict, modelName: "Data/Car_Obj", modelExt: "obj", calcNormals: true)
+			let model = Model(modelDesc: desc, overrideBaseColourMap: defaultTex)
+
+			player = Player(transform: float4x4(), mesh: model, touchMgr: touchMgr)
+			gameObjects.append(player!)
+		}
+
+		//camera
+		if verticalScroller
+		{
+			var mat = float4x4()
+			mat.rotate(-.pi / 2, axis: float3(1, 0, 0))
+			mat[3] = float4(0, 15, 0, 1)
+			camera = ScrollingCamera(transform: mat)
+		}
+		else
+		{
+			camera = FlyCamera(transform: float4x4())
 		}
 		
 		//main pass
@@ -147,7 +165,7 @@ class App
 	{
 		kernel.updateSubViews(view: view)
 		
-		proj = float4x4.makePerspectiveViewAngle(Utils.ToRads(degs: 85.0), aspectRatio: Float(view.bounds.size.width / view.bounds.size.height), nearZ: 0.01, farZ: 100.0)
+		proj = float4x4.makePerspectiveViewAngle(Utils.ToRads(degs: 85.0), aspectRatio: Float(view.bounds.size.width / view.bounds.size.height), nearZ: 0.01, farZ: 500.0)
 	}
 	
 	func update(delta: CFTimeInterval)
@@ -158,7 +176,7 @@ class App
 			dt = 0.33
 		}
 		
-		player.update(dt, touchMgr: touchMgr)
+		camera.update(dt, touchMgr: touchMgr)
 		for obj in gameObjects
 		{
 			obj.update(dt)
@@ -173,8 +191,8 @@ class App
 	{
 		mainPass.frame()
 		mainPass.getPassUniforms().proj = proj
-		mainPass.getPassUniforms().view = player.viewMatrix
-		mainPass.getPassUniforms().cameraPos = player.cameraTransform[3].xyz
+		mainPass.getPassUniforms().view = camera.viewMatrix
+		mainPass.getPassUniforms().cameraPos = camera.cameraTransform[3].xyz
 		mainPass.doCulling(gameObjects)
 		mainPass.render(depthTex: gKernel.depthTex!)
 	}

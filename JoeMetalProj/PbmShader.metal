@@ -93,11 +93,11 @@ struct MeshInstanceUniforms
 struct MaterialUniforms
 {
 	float3 		baseColor;
-	float3 		roughness;
-	float3 		irradiatedColor;
-	float3 		metalness;
+	float 		roughness;
+	float 		metalness;
 	float       ambientOcclusion;
-	packed_int3 padding;
+	float		padding;
+	float3 		irradiatedColor;
 };
 
 //MARK: internal structures
@@ -219,12 +219,12 @@ LightingParameters CalculateParameters(VertexOut					in,
 	if(kHasRoughnessMap)
 		parameters.roughness = max(roughnessMap.sample(linearSampler, in.uv).x, 0.001f);
 	else
-		parameters.roughness = materialUniforms.roughness.x;
+		parameters.roughness = materialUniforms.roughness;
 
 	if(kHasMetallicMap)
 		parameters.metalness = metallicMap.sample(linearSampler, in.uv).x;
 	else
-		parameters.metalness =  materialUniforms.metalness.x;
+		parameters.metalness =  materialUniforms.metalness;
 
 	if(kHasAoMap)
 		parameters.ambientOcclusion = ambientOcclusionMap.sample(linearSampler, in.uv).x;

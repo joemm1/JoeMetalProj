@@ -54,19 +54,19 @@ class ModelBase : Mesh
 				maps[TextureInputTypes.kBaseColour.rawValue] = baseColourMap}
 			else
 			{
-				ModelBase.setUpMaterialProperty(mdlMaterial: mdlSm.material!, semantic: MDLMaterialSemantic.baseColor, texture: &maps[TextureInputTypes.kBaseColour.rawValue], uniform: &uniforms.baseColour)
+				ModelBase.setUpMaterialProperty(mdlMaterial: mdlSm.material!, semantic: MDLMaterialSemantic.baseColor, texture: &maps[TextureInputTypes.kBaseColour.rawValue], uniform: &uniforms.baseColour, expectedUniformSizeInWords: 3)
 			}
 
-			ModelBase.setUpMaterialProperty(mdlMaterial: mdlSm.material!, semantic: MDLMaterialSemantic.metallic, texture: &maps[TextureInputTypes.kMetallic.rawValue], uniform: &uniforms.metalness)
+			ModelBase.setUpMaterialProperty(mdlMaterial: mdlSm.material!, semantic: MDLMaterialSemantic.metallic, texture: &maps[TextureInputTypes.kMetallic.rawValue], uniform: &uniforms.metalness, expectedUniformSizeInWords: 1)
 
-			ModelBase.setUpMaterialProperty(mdlMaterial: mdlSm.material!, semantic: MDLMaterialSemantic.roughness, texture: &maps[TextureInputTypes.kRoughness.rawValue], uniform: &uniforms.roughness)
+			ModelBase.setUpMaterialProperty(mdlMaterial: mdlSm.material!, semantic: MDLMaterialSemantic.roughness, texture: &maps[TextureInputTypes.kRoughness.rawValue], uniform: &uniforms.roughness, expectedUniformSizeInWords: 1)
 
-			ModelBase.setUpMaterialProperty(mdlMaterial: mdlSm.material!, semantic: MDLMaterialSemantic.tangentSpaceNormal, texture: &maps[TextureInputTypes.kNormal.rawValue], uniform: nil)
+			ModelBase.setUpMaterialProperty(mdlMaterial: mdlSm.material!, semantic: MDLMaterialSemantic.tangentSpaceNormal, texture: &maps[TextureInputTypes.kNormal.rawValue], uniform: nil, expectedUniformSizeInWords: 0)
 
-			ModelBase.setUpMaterialProperty(mdlMaterial: mdlSm.material!, semantic: MDLMaterialSemantic.ambientOcclusion, texture: &maps[TextureInputTypes.kAmbientOcclusion.rawValue], uniform: &uniforms.ambientOcclusion)
+			ModelBase.setUpMaterialProperty(mdlMaterial: mdlSm.material!, semantic: MDLMaterialSemantic.ambientOcclusion, texture: &maps[TextureInputTypes.kAmbientOcclusion.rawValue], uniform: &uniforms.ambientOcclusion, expectedUniformSizeInWords: 1, invert: true)
 
 			//#todo
-			//ModelBase.setUpMaterialProperty(mdlMaterial: mdlSm.material!, semantic: MDLMaterialSemantic.irradiatedColor, texture: &maps[TextureInputTypes.kIrradianceMap.rawValue], uniform: &uniforms.irradiatedColor)
+			//ModelBase.setUpMaterialProperty(mdlMaterial: mdlSm.material!, semantic: MDLMaterialSemantic.irradiatedColor, texture: &maps[TextureInputTypes.kIrradianceMap.rawValue], uniform: &uniforms.irradiatedColor, expectedUniformSizeInWords: 3)
 
 			let material = Material(shaderDict: shaderDict, maps: maps, uniforms: uniforms)
 
@@ -77,7 +77,7 @@ class ModelBase : Mesh
 			for p in 0..<mdlSm.material!.count
 			{
 				let prop = mdlSm.material![p]
-				print("Semantic: \(String(describing: prop!.semantic))")
+				print("Semantic: \(String(reflecting: prop!.semantic))")
 			}
 		}
 		
@@ -106,7 +106,9 @@ class ModelBase : Mesh
 	static func setUpMaterialProperty(mdlMaterial: MDLMaterial,
 	                                  semantic: MDLMaterialSemantic,
 	                                  texture: inout Texture?,
-	                                  uniform: UnsafeMutableRawPointer?)
+	                                  uniform: UnsafeMutableRawPointer?,
+	                                  expectedUniformSizeInWords: Int,
+	                                  invert: Bool = false)
 	{
 		let prop = mdlMaterial.property(with: semantic)
 		if let prop = prop
@@ -119,10 +121,25 @@ class ModelBase : Mesh
 			{
 				if prop.type == MDLMaterialPropertyType.float
 				{
-					memcpy(uniform, &prop.floatValue, MemoryLayout<Float>.stride)
+					if expectedUniformSizeInWords != 1
+					{
+						fatalError("Unexpected uniform size from obj")
+					}
+
+					var val = prop.floatValue
+					if invert
+					{
+						val = 1 - prop.floatValue
+					}
+					memcpy(uniform, &val, MemoryLayout<Float>.stride)
 				}
 				else if prop.type == MDLMaterialPropertyType.float3
 				{
+					if expectedUniformSizeInWords != 3
+					{
+						fatalError("Unexpected uniform size from obj")
+					}
+
 					memcpy(uniform, &prop.float3Value, MemoryLayout<Float>.stride * 3)
 				}
 			}
