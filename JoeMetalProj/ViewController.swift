@@ -49,9 +49,9 @@ class ViewController: UIViewController
         }
 		
 		//print to screen
-		let strGpu = String(format: "GPU: %.1f ms", app.mainPass.lastFrameGpuTime * 1000.0)
+		let strGpu = String(format: "GPU: %.1f ms", app.renderer.mainPass.lastFrameGpuTime * 1000.0)
 		gKernel.textLayer.addEntry(TextEntry(strGpu))
-		let strCpu = String(format: "CPU: %.1f ms", (app.mainPass.timeAtPresent.timeIntervalSince1970 - start.timeIntervalSince1970) * 1000.0)
+		let strCpu = String(format: "CPU: %.1f ms", (app.renderer.mainPass.timeAtPresent.timeIntervalSince1970 - start.timeIntervalSince1970) * 1000.0)
 		gKernel.textLayer.addEntry(TextEntry(strCpu))
     }
     

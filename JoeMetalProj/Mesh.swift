@@ -15,6 +15,7 @@ class Mesh
 	let name:               String
 	let aabbMin:			float3
 	let aabbMax:			float3
+	let boundingSphere:		float4
 	var subMeshes:			[SubMesh]
 	
 	init(subMeshes: [SubMesh], aabbMin: float3, aabbMax: float3, name: String)
@@ -22,7 +23,13 @@ class Mesh
 		self.subMeshes = subMeshes
 		self.aabbMin = aabbMin
 		self.aabbMax = aabbMax
-		
+
+		let centre = (aabbMin + aabbMax) / 2
+		let dist1 = length(aabbMin - centre)
+		let dist2 = length(aabbMax - centre)
+		let radius = max(dist1, dist2)
+		boundingSphere = float4(centre, radius)
+
 		self.name = name
 	}
 	
@@ -32,20 +39,5 @@ class Mesh
 		{
 			sm.render(renderEncoder: renderEncoder, materialOverride: materialOverride)
 		}
-	}
-	
-	func getWorldAabbPoints(world: float4x4) -> [float4]
-	{
-		let aabbMinWorld = world * float4(aabbMin, 1.0)
-		let aabbMaxWorld = world * float4(aabbMax, 1.0)
-		let aabb: [float4] = [ aabbMinWorld, aabbMaxWorld ]
-		
-		var worldPoints = [float4]()
-		for i in 0..<8
-		{
-			worldPoints.append( float4( aabb[i>>2].x, aabb[(i>>1)&1].y, aabb[i&1].z, 1.0) )
-		}
-		
-		return worldPoints
 	}
 }

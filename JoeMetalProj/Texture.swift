@@ -16,11 +16,14 @@ class Texture
 	
 	init(path: String, ext: String)
 	{
+		//#todo
+		/*
 		let options = [
-			MTKTextureLoader.Option.SRGB: false,
+			//MTKTextureLoader.Option.SRGB: false,
 			MTKTextureLoader.Option.textureStorageMode: MTLStorageMode.private,
 			MTKTextureLoader.Option.textureCPUCacheMode: MTLTextureUsage.shaderRead
 			] as [MTKTextureLoader.Option : Any]
+		*/
 
 		let path = Bundle.main.path(forResource: path, ofType: ext)!
 		let data = try! NSData(contentsOfFile: path) as Data

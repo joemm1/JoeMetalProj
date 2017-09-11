@@ -14,10 +14,7 @@ class App
 {
 	let view:				UIView
 	let kernel:				Kernel
-	
-	let mainPass: 			RenderPass
-	var proj =				float4x4()
-	
+	let renderer =			Renderer()
 	var touchMgr =			TouchMgr()
 
 	let shaderDict:			ShaderDict
@@ -130,17 +127,18 @@ class App
 		//game objects list
 		for _ in 0..<kNumEnemies
 		{
-			let obj = Enemy(enemyDescs: enemyDescs)
+			let obj = Enemy(enemyDescs: enemyDescs, verticalScroller: verticalScroller)
 			gameObjects.append(obj)
 		}
 
 		//player
 		if verticalScroller
 		{
-			let desc = ModelDesc(shaderDict: shaderDict, modelName: "Data/Car_Obj", modelExt: "obj", calcNormals: true)
+			let desc = ModelDesc(shaderDict: shaderDict, modelName: "Data/lowpolytree", modelExt: "obj", calcNormals: true)
 			let model = Model(modelDesc: desc, overrideBaseColourMap: defaultTex)
+			let world = float4x4.makeTranslation(0, 0, 10)
 
-			player = Player(transform: float4x4(), mesh: model, touchMgr: touchMgr)
+			player = Player(transform: world, mesh: model, touchMgr: touchMgr)
 			gameObjects.append(player!)
 		}
 
@@ -156,16 +154,13 @@ class App
 		{
 			camera = FlyCamera(transform: float4x4())
 		}
-		
-		//main pass
-		mainPass = RenderPass(clearColour: MTLClearColor(red: 0.1, green: 0.1, blue: 0.1, alpha: 1.0))
 	}
 	
 	func updateSubViews()
 	{
 		kernel.updateSubViews(view: view)
 		
-		proj = float4x4.makePerspectiveViewAngle(Utils.ToRads(degs: 85.0), aspectRatio: Float(view.bounds.size.width / view.bounds.size.height), nearZ: 0.01, farZ: 500.0)
+		renderer.proj = float4x4.makePerspectiveViewAngle(Utils.ToRads(degs: 85.0), aspectRatio: Float(view.bounds.size.width / view.bounds.size.height), nearZ: 0.01, farZ: 500.0)
 	}
 	
 	func update(delta: CFTimeInterval)
@@ -175,25 +170,36 @@ class App
 		{
 			dt = 0.33
 		}
-		
+
+		//update camera
 		camera.update(dt, touchMgr: touchMgr)
-		for obj in gameObjects
+
+		//update game objects and take a note of which ones to delete
+		var toDelete = [Int]()
+
+		for n in 0..<gameObjects.count
 		{
-			obj.update(dt)
+			if gameObjects[n].update(dt, player: player) == .kAwaitingTermination
+			{
+				toDelete.append(n)
+			}
 		}
-		
+
+		//delete any game objects awaiting termination
+		for d in (toDelete.count - 1) ... 0
+		{
+			gameObjects.remove(at: d)
+		}
+
+		//update touch mgr
 		touchMgr.frame()
-		
+
+		//update kernel
 		gKernel.update()
 	}
 	
 	func render()
 	{
-		mainPass.frame()
-		mainPass.getPassUniforms().proj = proj
-		mainPass.getPassUniforms().view = camera.viewMatrix
-		mainPass.getPassUniforms().cameraPos = camera.cameraTransform[3].xyz
-		mainPass.doCulling(gameObjects)
-		mainPass.render(depthTex: gKernel.depthTex!)
+		renderer.render(camera: camera, objs: gameObjects)
 	}
 }

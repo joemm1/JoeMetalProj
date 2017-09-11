@@ -34,16 +34,26 @@ class Enemy : GameObject
 	var rotAxis:			float3
 	var rads =				0.0 as Float
 	
-	init(enemyDescs: [EnemyDesc])
+	init(enemyDescs: [EnemyDesc], verticalScroller: Bool)
 	{
 		let rx = Utils.RandomFloat(min: -1.0, max: 1.0)
 		let ry = Utils.RandomFloat(min: -1.0, max: 1.0)
 		let rz = Utils.RandomFloat(min: -1.0, max: 1.0)
-		
-		let theta = Utils.RandomFloat(min: 0.0, max: 2.0 * .pi)
-		let r = Utils.RandomFloat(min: 2.0, max: 20.0)
-		let y = Float(0.0)//Utils.RandomFloat(min: -4.0, max: 4.0)
-		translation = float4(r * cos(theta), y, r * sin(theta), 1)
+		let startRot = Utils.RandomFloat(min: 0.0, max: .pi)
+
+		if verticalScroller
+		{
+			let x = Utils.RandomFloat(min: -7.0, max: 7.0)
+			let z = -Utils.RandomFloat(min: 0.0, max: 100.0)
+			translation = float4(x, 0, z, 1)
+		}
+		else
+		{
+			let theta = Utils.RandomFloat(min: 0.0, max: 2.0 * .pi)
+			let r = Utils.RandomFloat(min: 2.0, max: 20.0)
+			let y = Utils.RandomFloat(min: -4.0, max: 4.0)
+			translation = float4(r * cos(theta), y, r * sin(theta), 1)
+		}
 		
 		let p = Utils.RandomFloat(min: 0.0, max: 1.0)
 		var cumProb = 0.0 as Float
@@ -59,9 +69,10 @@ class Enemy : GameObject
 			}
 		}
 		
-		var world = float4x4.makeScale(selectedDesc.scale, selectedDesc.scale, selectedDesc.scale)
+		var world = float4x4()
 		world[3] = translation
 		rotAxis = (selectedDesc.fullRotate) ? float3(rx, ry, rz) : float3(0, ry, 0)
+		world.rotate(startRot, axis: rotAxis)
 
 		var material: Material?
 		if selectedDesc.randomColour
@@ -70,15 +81,27 @@ class Enemy : GameObject
 			material!.uniforms.baseColour = Utils.RandomColour()
 		}
 
-		let meshInstance = MeshInstance(mesh: selectedDesc.mesh, world: world, overrideMaterial: material)
+		let meshInstance = MeshInstance(mesh: selectedDesc.mesh, world: world, scale: selectedDesc.scale, overrideMaterial: material)
 		
 		super.init(meshInstance: meshInstance)
 	}
-	
-	override func update(_ dt: Float)
+
+	//returns false to get itself deleted
+	override func update(_ dt: Float, player: Player?) -> State
 	{
+		if let player = player
+		{
+			if Utils.sphereSphereIntersect(bs1: meshInstance.getWorldBoundingSphere(), bs2: player.meshInstance.getWorldBoundingSphere())
+			{
+				meshInstance.isAlwaysHidden = true
+				return .kAwaitingTermination
+			}
+		}
+
 		rads += dt
 		meshInstance.meshInstUniforms.world.rotate(dt, axis: rotAxis)
 		meshInstance.meshInstUniforms.world[3] = translation
+
+		return .kRunning
 	}
 }

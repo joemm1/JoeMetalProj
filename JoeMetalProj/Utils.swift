@@ -145,4 +145,10 @@ class Utils
 		
 		return true;
 	}
+
+	static func sphereSphereIntersect(bs1: float4, bs2: float4) -> Bool
+	{
+		let dist = length(bs1.xyz - bs2.xyz)
+		return dist < (bs1.w + bs2.w)
+	}
 }

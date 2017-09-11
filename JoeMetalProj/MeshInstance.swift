@@ -42,13 +42,18 @@ class MeshInstance
 {
 	let mesh:						Mesh
 	var meshInstUniforms:			MeshInstanceUniforms
+	let scale:						Float
 	var overrideMaterial:			Material?
+	var isAlwaysHidden =			false
 	
-	init(mesh: Mesh, world: float4x4, overrideMaterial: Material? = nil)
+	init(mesh: Mesh, world: float4x4, scale: Float, overrideMaterial: Material? = nil)
 	{
 		meshInstUniforms = MeshInstanceUniforms(device: gKernel.device)
-		meshInstUniforms.world = world
 
+		let scaleMat = float4x4.makeScale(scale, scale, scale)
+		meshInstUniforms.world = world * scaleMat
+
+		self.scale = scale
 		self.overrideMaterial = overrideMaterial
 		self.mesh = mesh
 	}
@@ -59,9 +64,9 @@ class MeshInstance
 		mesh.render(renderEncoder: renderEncoder, materialOverride: overrideMaterial)
 	}
 	
-	func DoesWorldAabbIntersectAllHalfSpaces(_ planes: [float4]) -> Bool
+	func doesWorldAabbIntersectAllHalfSpaces(_ planes: [float4]) -> Bool
 	{
-		let points = mesh.getWorldAabbPoints(world: meshInstUniforms.world)
+		let points = getWorldAabbPoints()
 		if points.count == 0
 		{
 			return true
@@ -69,4 +74,31 @@ class MeshInstance
 		
 		return Utils.DoesPointCloudIntersectAllHalfSpaces(points, planes: planes)
 	}
-};
+
+	func isVisible(_ planes: [float4]) -> Bool
+	{
+		return !isAlwaysHidden && doesWorldAabbIntersectAllHalfSpaces(planes)
+	}
+
+	func getWorldAabbPoints() -> [float4]
+	{
+		let aabbMinWorld = meshInstUniforms.world * float4(mesh.aabbMin, 1.0)
+		let aabbMaxWorld = meshInstUniforms.world * float4(mesh.aabbMax, 1.0)
+		let aabb: [float4] = [ aabbMinWorld, aabbMaxWorld ]
+
+		var worldPoints = [float4]()
+		for i in 0..<8
+		{
+			worldPoints.append( float4( aabb[i>>2].x, aabb[(i>>1)&1].y, aabb[i&1].z, 1.0) )
+		}
+
+		return worldPoints
+	}
+
+	func getWorldBoundingSphere() -> float4
+	{
+		let worldPos = meshInstUniforms.world * float4(mesh.boundingSphere.xyz, 1)
+		let radius = mesh.boundingSphere.w * scale
+		return float4(worldPos.xyz, radius)
+	}
+}

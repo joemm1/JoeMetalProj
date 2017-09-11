@@ -104,7 +104,7 @@ class RenderPass
 		
 		for obj in gameObjects
 		{
-			if obj.meshInstance.DoesWorldAabbIntersectAllHalfSpaces(planes)
+			if obj.meshInstance.isVisible(planes)
 			{
 				meshInstances.append(obj.meshInstance)
 			}

@@ -30,6 +30,7 @@
 		D89E33F61F1FCF650006F5A3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D89E33EB1F1FCF650006F5A3 /* AppDelegate.swift */; };
 		D8A1BAB71F59DB3C00F59B83 /* SubMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8A1BAB61F59DB3C00F59B83 /* SubMesh.swift */; };
 		D8BB06AC1F465602004F4A48 /* Data in Resources */ = {isa = PBXBuildFile; fileRef = D8BB06AB1F4655B0004F4A48 /* Data */; };
+		D8E4575B1F667E5B009C6DC7 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8E4575A1F667E5B009C6DC7 /* Renderer.swift */; };
 		D8F143A91F54C16F0022041B /* PbmShader.metal in Sources */ = {isa = PBXBuildFile; fileRef = D8F143A81F54C16F0022041B /* PbmShader.metal */; };
 		D8F143AC1F5734DA0022041B /* Material.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8F143AB1F5734DA0022041B /* Material.swift */; };
 		D8FD394B1F223AF3003A548B /* Pass.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8FD394A1F223AF3003A548B /* Pass.swift */; };
@@ -89,6 +90,8 @@
 		D89E33EE1F1FCF650006F5A3 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D8A1BAB61F59DB3C00F59B83 /* SubMesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubMesh.swift; sourceTree = "<group>"; };
 		D8BB06AB1F4655B0004F4A48 /* Data */ = {isa = PBXFileReference; lastKnownFileType = text; name = Data; path = JoeMetalProj/Data; sourceTree = SOURCE_ROOT; };
+		D8E4575A1F667E5B009C6DC7 /* Renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
+		D8E4575C1F66804A009C6DC7 /* Shared.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Shared.h; sourceTree = "<group>"; };
 		D8F143A81F54C16F0022041B /* PbmShader.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = PbmShader.metal; sourceTree = "<group>"; };
 		D8F143AB1F5734DA0022041B /* Material.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Material.swift; sourceTree = "<group>"; };
 		D8FD394A1F223AF3003A548B /* Pass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pass.swift; sourceTree = "<group>"; };
@@ -218,6 +221,7 @@
 		D8F143AA1F5734720022041B /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				D8E4575A1F667E5B009C6DC7 /* Renderer.swift */,
 				D8FD395F1F23EE11003A548B /* Kernel.swift */,
 				D856494B1F3CDF4900D069FD /* Buffer.swift */,
 				D87C49451F30F59D0071EF45 /* Shader.swift */,
@@ -254,6 +258,7 @@
 			children = (
 				D87C49471F31BC630071EF45 /* Physics.metal */,
 				D8F143A81F54C16F0022041B /* PbmShader.metal */,
+				D8E4575C1F66804A009C6DC7 /* Shared.h */,
 			);
 			name = Shaders;
 			sourceTree = "<group>";
@@ -455,6 +460,7 @@
 				D8FD39621F24050D003A548B /* GameObject.swift in Sources */,
 				D85F97C31F436B6200FB7BDE /* Primitive.swift in Sources */,
 				D8FD39661F240BAF003A548B /* Utils.swift in Sources */,
+				D8E4575B1F667E5B009C6DC7 /* Renderer.swift in Sources */,
 				D8FD39591F23E8EB003A548B /* App.swift in Sources */,
 				D8FD394B1F223AF3003A548B /* Pass.swift in Sources */,
 				D89E33F61F1FCF650006F5A3 /* AppDelegate.swift in Sources */,

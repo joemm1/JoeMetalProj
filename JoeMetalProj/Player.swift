@@ -16,13 +16,21 @@ class Player : GameObject
 	init(transform: float4x4, mesh: Mesh, touchMgr: TouchMgr)
 	{
 		self.touchMgr = touchMgr
-		let meshInstance = MeshInstance(mesh: mesh, world: transform)
+		let meshInstance = MeshInstance(mesh: mesh, world: transform, scale: 1.0)
 
 		super.init(meshInstance: meshInstance)
 	}
 
-	override func update(_ dt: Float)
+	override func update(_ dt: Float, player: Player?) -> State
 	{
-		meshInstance.meshInstUniforms.world[3] += float4(0, 0, -dt, 1)
+		if touchMgr.status == .swiping
+		{
+			meshInstance.meshInstUniforms.world[3].x += touchMgr.lastDir.0 * 0.03
+			meshInstance.meshInstUniforms.world[3].z += touchMgr.lastDir.1 * 0.03
+		}
+
+		meshInstance.meshInstUniforms.world[3].z -= dt
+
+		return .kRunning
 	}
 }

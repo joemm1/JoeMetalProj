@@ -70,6 +70,6 @@ class ScrollingCamera : Camera
 
 	override func update(_ dt: Float, touchMgr: TouchMgr)
 	{
-		cameraTransform[3] += float4(0, 0, -dt, 0)
+		cameraTransform[3].z -= dt
 	}
 }
